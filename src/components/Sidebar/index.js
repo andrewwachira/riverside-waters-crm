@@ -1,17 +1,11 @@
-"use client";
-
-import React, { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import SidebarItem from "@/components/Sidebar/SidebarItem";
-import ClickOutside from "@/components/ClickOutside";
-import useLocalStorage from "@/hooks/useLocalStorage";
-
-interface SidebarProps {
-  sidebarOpen: boolean;
-  setSidebarOpen: (arg: boolean) => void;
-}
+"use client"
+import React from "react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import SidebarItem from "@/components/Sidebar/SidebarItem"
+import ClickOutside from "@/components/ClickOutside"
+import useLocalStorage from "@/hooks/useLocalStorage"
 
 const menuGroups = [
   {
@@ -47,7 +41,7 @@ const menuGroups = [
         ),
         label: "Dashboard",
         route: "#",
-        children: [{ label: "eCommerce", route: "/" }],
+        children: [{ label: "eCommerce", route: "/" }]
       },
       {
         icon: (
@@ -66,7 +60,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Calendar",
-        route: "/calendar",
+        route: "/calendar"
       },
       {
         icon: (
@@ -89,7 +83,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Profile",
-        route: "/profile",
+        route: "/profile"
       },
       {
         icon: (
@@ -127,8 +121,8 @@ const menuGroups = [
         route: "#",
         children: [
           { label: "Form Elements", route: "/forms/form-elements" },
-          { label: "Form Layout", route: "/forms/form-layout" },
-        ],
+          { label: "Form Layout", route: "/forms/form-layout" }
+        ]
       },
       {
         icon: (
@@ -159,7 +153,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Tables",
-        route: "/tables",
+        route: "/tables"
       },
       {
         icon: (
@@ -194,9 +188,9 @@ const menuGroups = [
           </svg>
         ),
         label: "Settings",
-        route: "/settings",
-      },
-    ],
+        route: "/settings"
+      }
+    ]
   },
   {
     name: "OTHERS",
@@ -234,7 +228,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Chart",
-        route: "/chart",
+        route: "/chart"
       },
       {
         icon: (
@@ -276,8 +270,8 @@ const menuGroups = [
         route: "#",
         children: [
           { label: "Alerts", route: "/ui/alerts" },
-          { label: "Buttons", route: "/ui/buttons" },
-        ],
+          { label: "Buttons", route: "/ui/buttons" }
+        ]
       },
       {
         icon: (
@@ -315,16 +309,16 @@ const menuGroups = [
         route: "#",
         children: [
           { label: "Sign In", route: "/auth/signin" },
-          { label: "Sign Up", route: "/auth/signup" },
-        ],
-      },
-    ],
-  },
-];
+          { label: "Sign Up", route: "/auth/signup" }
+        ]
+      }
+    ]
+  }
+]
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const pathname = usePathname();
-  const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+  const pathname = usePathname()
+  const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard")
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
@@ -393,7 +387,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         </div>
       </aside>
     </ClickOutside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

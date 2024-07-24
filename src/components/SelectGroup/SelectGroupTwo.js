@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-const SelectGroupTwo: React.FC = () => {
+const SelectGroupTwo = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
 
