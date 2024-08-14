@@ -20,7 +20,7 @@ const DatePicker = ({labelName,inputName,getDatefn,Err,clearWarning}) => {
         onChange: (selectedDates, dateStr) => {getDatefn(dateStr, inputName),clearWarning(inputName);}
       });
     }
-  }, [getDatefn, inputName]);
+  }, [getDatefn, inputName,clearWarning]);
   
 
   return (

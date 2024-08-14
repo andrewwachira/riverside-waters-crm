@@ -8,7 +8,7 @@ const DropdownDefault = () => {
 
   // close on click outside
   useEffect(() => {
-    const clickHandler = ({ target }: MouseEvent) => {
+    const clickHandler = ({ target }) => {
       if (!dropdown.current) return;
       if (
         !dropdownOpen ||
@@ -24,7 +24,7 @@ const DropdownDefault = () => {
 
   // close if the esc key is pressed
   useEffect(() => {
-    const keyHandler = ({ keyCode }: KeyboardEvent) => {
+    const keyHandler = ({ keyCode }) => {
       if (!dropdownOpen || keyCode !== 27) return;
       setDropdownOpen(false);
     };
