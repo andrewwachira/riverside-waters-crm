@@ -7,11 +7,11 @@ const filterSchema = new mongoose.Schema(
         u3_ChangeDate : {type:Date, required:true},
         ro_ChangeDate:{type:Date,default:false},
         pc_ChangeDate:{type:Date,default:false}, 
-        rc_ChangeDate:{type:Boolean,default:false},
+        rc_ChangeDate:{type:Date,default:false},
         changeHistory : [
             {
                 adminId: {type:mongoose.Schema.Types.ObjectId,ref:"User",required:true},
-                comments: {type:String,required:true},
+                comments: {type:String},
                 date: {type:Date}
             }
         ],
