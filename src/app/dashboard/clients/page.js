@@ -85,7 +85,7 @@ async function Clients() {
             </div>
 
             <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <Link href="#" className="text-meta-5">More Details</Link>
+              <Link href={`/dashboard/clients/${client._id}/`} className="text-meta-5">More Details</Link>
             </div>
           </div>
         ))}

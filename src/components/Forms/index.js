@@ -230,7 +230,7 @@ function Forms() {
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments</label>
                                 <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Enter your comments/notes on this filter change" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
                         </div>
-                        <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">Save Filter Info</button>
+                        <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white hover:bg-opacity-90">Save Filter Info</button>
                     </div>
             </form>
         </div>
