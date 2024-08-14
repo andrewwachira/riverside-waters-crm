@@ -5,18 +5,24 @@ import Client from '@/lib/db/models/Client';
 import Filter from '@/lib/db/models/Filter';
 import Test from '@/lib/db/models/Test';
 import Link from 'next/link';
-
+import moment from "moment";
 
 async function Clients({params}) {
   
   await db.connect();
   const client = await Client.findById(params.id);
   const filterInfo = await Filter.findOne({clientId:params.id});
-  console.log(client,filterInfo);
+
+  function getDiff(date){
+    const incomingDate = moment(date);
+    const current = moment().startOf('day');
+    var daysDiff = moment.duration(incomingDate.diff(current)).asDays();
+    return daysDiff
+  }
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Clients"/>
-      <h1 className="text-center text-3xl my-4">{client.firstName + " " + client.lastName}</h1>
+      <Breadcrumb pageName="Clients" additonalRoute={client.firstName}/>
+      <h1 className="text-center text-5xl my-5 ">{client.firstName + " " + client.lastName}</h1>
       <div className="">
         <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 mb-7 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white"> Client Details</h4>
@@ -59,7 +65,7 @@ async function Clients({params}) {
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                <p className="text-meta-3">{client.residence}</p>
+                <p className="text-black">{client.residence}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
@@ -71,10 +77,19 @@ async function Clients({params}) {
               </div>
             </div>
           </div>
-          <button className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Client Details</button>
+          <Link href={`/dashboard/clients/${client._id}/edit-client-info`} className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Client Details</Link>
+
         </div>
         <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
-          <h4 className="mb-6 text-xl font-semibold text-black dark:text-white"> Filter Information</h4>
+          <div className='flex justify-between items-center mb-4'>
+            <h4 className="mb-6 text-xl font-semibold text-black dark:text-white"> Filter Information</h4>
+            <div className='flex'>
+              <span className='text-rose-600 mx-1'>{`< 7 days`}</span>
+              <span className='text-orange-500 mx-1'>{`< 21 days`}</span>
+              <span className='text-meta-3 mx-1'>{`> 3 weeks`}</span>
+            </div>
+          </div>
+         
           <div className="flex w-full">
               <div className="grid grid-row-5 rounded-sm bg-gray-2 dark:bg-meta-4 w-full">
                 <div className="p-2.5 border-b border-stroke ">
@@ -106,23 +121,23 @@ async function Clients({params}) {
               </div> 
               <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
                 <div className="border-b border-stroke flex tems-center justify-center p-2.5">
-                  <p className=" text-black dark:text-white sm:block">{filterInfo.sedimentFilter ? "Yes" : "No"}</p>
+                  <p className={`text-black dark:text-white sm:block`}>{filterInfo.sedimentFilter ? "Yes" : "No"}</p>
                 </div>
 
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className="text-black dark:text-white">{(filterInfo.u3_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.u3_ChangeDate).toDateString()}</p>
                 </div>
 
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className="text-meta-3">{(filterInfo.ro_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.ro_ChangeDate).toDateString()}</p>
                 </div>
 
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className="text-black dark:text-white">{(filterInfo.pc_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.pc_ChangeDate).toDateString()}</p>
                 </div>
 
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className="text-black dark:text-white">{(filterInfo.rc_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.rc_ChangeDate).toDateString()}</p>
                 </div>
               </div>
             </div>

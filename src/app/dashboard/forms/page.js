@@ -6,7 +6,7 @@ async function Form() {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName={"Forms"}></Breadcrumb>
+      <Breadcrumb pageName="Forms"></Breadcrumb>
       <Forms></Forms>
     </DefaultLayout>
   )

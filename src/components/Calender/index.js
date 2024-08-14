@@ -1,3 +1,4 @@
+"use client"
 import Breadcrumb from "../Breadcrumbs/Breadcrumb";
 import {useState} from "react";
 import Link from "next/link";
@@ -105,7 +106,7 @@ const schedulerData = [
         </svg>
       </button>
       </div>
-      <Breadcrumb pageName={`Calendar ${year}`} />
+      <Breadcrumb pageName={`scheduler`} additonalRoute={`${year}`} />
       
       <div className="flex items-center justify-center">
         <button className="px-1 mx-4  bg-primary px-4 py-2 rounded-md text-center text-sm text-white" onClick={()=>setMonth(prevState=> --prevState)} >Previous</button>

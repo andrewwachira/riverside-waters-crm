@@ -35,7 +35,7 @@ async function Clients() {
       </div>
       :
       <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-5">
+        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 md:grid-cols-5">
           <div className="p-2.5 xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Name
@@ -46,18 +46,18 @@ async function Clients() {
               Phone number
             </h5>
           </div>
-          <div className="p-2.5 text-center xl:p-5">
+          <div className="hidden p-2.5 text-center xl:p-5 md:block">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Residence
             </h5>
           </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
+          <div className="hidden p-2.5 text-center md:block  xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Contact Person
             </h5>
           </div>
          
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
+          <div className="p-2.5 text-center xl:p-5">
             <h5 className="text-sm font-medium uppercase xsm:text-base">
               Action
             </h5>
@@ -67,7 +67,7 @@ async function Clients() {
         {clients.map((client, key) => (
           <div className={`grid grid-cols-3 sm:grid-cols-5 ${ key === clients.length - 1 ? "" : "border-b border-stroke dark:border-strokedark" }`} key={key}>
             <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <p className="hidden text-black dark:text-white sm:block">
+              <p className="text-black dark:text-white sm:block">
                 {client.firstName + " " + client.lastName}
               </p>
             </div>
@@ -76,16 +76,16 @@ async function Clients() {
               <p className="text-black dark:text-white">{client.phoneNumber}</p>
             </div>
 
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-meta-3">{client.residence}</p>
+            <div className="hidden items-center justify-center md:block p-2.5 xl:p-5">
+              <p className="text-black text-center">{client.residence}</p>
             </div>
 
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <p className="text-black dark:text-white">{client.contactPerson?.name}</p>
+            <div className="hidden items-center justify-center p-2.5 md:block xl:p-5">
+              <p className="text-black text-center dark:text-white">{client.contactPerson?.name}</p>
             </div>
 
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <Link href={`/dashboard/clients/${client._id}/`} className="text-meta-5">More Details</Link>
+            <div className="items-center justify-center p-2.5 sm:flex xl:p-5">
+              <Link href={`/dashboard/clients/${client._id}/`} className="text-meta-5 underline">More Details</Link>
             </div>
           </div>
         ))}

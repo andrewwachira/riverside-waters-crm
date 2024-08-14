@@ -1,7 +1,5 @@
-'use client'
 import DefaultLayout from '@/components/Layouts/DefaultLayout'
 import React from 'react'
-
 import Calendar from '@/components/Calender'
 
 function Scheduler() {
