@@ -67,7 +67,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Clients",
-        route: "/clients"
+        route: "/dashboard/clients"
       },
       {
         icon: (
@@ -102,7 +102,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Forms",
-        route: "/forms",
+        route: "/dashboard/forms",
       },
       {
         icon: (
@@ -121,7 +121,7 @@ const menuGroups = [
         </svg>
         ),
         label: "Scheduler",
-        route: "/scheduler"
+        route: "/dashboard/scheduler"
       },
       {
         icon: (
@@ -156,7 +156,7 @@ const menuGroups = [
           </svg>
         ),
         label: "Settings",
-        route: "/settings"
+        route: "/dashboard/settings"
       }
     ]
   },

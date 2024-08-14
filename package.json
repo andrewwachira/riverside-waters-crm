@@ -9,9 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@nextui-org/date-picker": "^2.1.6",
+    "@uploadthing/react": "^6.7.2",
+    "axios": "^1.7.2",
+    "bcryptjs": "^2.4.3",
+    "crypto-js": "^4.2.0",
+    "flatpickr": "^4.6.13",
+    "mongoose": "^8.5.2",
     "next": "14.2.5",
+    "next-auth": "^5.0.0-beta.20",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-flatpickr": "^3.10.13",
+    "react-hook-form": "^7.52.1",
+    "react-slick": "^0.30.2",
+    "uploadthing": "^6.13.2"
   },
   "devDependencies": {
     "eslint": "^8",
