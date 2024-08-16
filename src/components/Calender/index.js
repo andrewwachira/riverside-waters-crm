@@ -1,7 +1,10 @@
 "use client"
 import Breadcrumb from "../Breadcrumbs/Breadcrumb";
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import Link from "next/link";
+import { getScheduleData } from "@/actions/server";
+// import { Loader} from "@/components/common/Loader";
+import { getDateDiff } from "@/lib/utils";
 
 const Calendar = () => {
   const [month,setMonth] = useState(new Date().getMonth());
@@ -12,19 +15,55 @@ const Calendar = () => {
   const currentDay = new Date().getDay();
   const currentDate = new Date().getDate();
   const currentMonth = new Date().getMonth();
-  
+  const [schedulerData,setSchedulerData] = useState([]);
+  const [scheduleDataErr,setScheduleDataErr] = useState(null);
+  const [loading,setLoading] = useState(false);
+  const [weeks,setWeeks] = useState(generateCalendar());
+
+  useEffect(()=>{
+      async function getData(){
+        setLoading(true);
+       const res =  await  getScheduleData();
+        if(res.status === 200){
+          let clients,filters;
+          const {payload} = res;
+          clients = payload.clients;
+          filters = payload.filters;
+          for (let client of clients) {
+            for(let filter of filters){
+              let filterEventIndex = ["Ultra 3 filters","Reverse Osmosis","Post Carbon","Remineralizing Cartilage"];
+              let filterEventArr = [filter.u3_ChangeDate,filter.ro_ChangeDate,filter.pc_ChangeDate,filter.rc_ChangeDate];
+              let soonestDate = filterEventArr.reduce((soonest, date) => {
+                return date > currentDate && (soonest === null || date < soonest) ? date : soonest;
+              }, null);
+              let filterEvent = filterEventArr.findIndex(date => date === soonestDate );
+              filter.filterType = filterEventIndex[filterEvent];
+              filter.soonestDate = soonestDate
+              if(client._id == filter.clientId){
+                client.filterInfo = filter;
+              }
+            } 
+          }
+          setSchedulerData(clients);
+          setLoading(false);
+        }else{
+          setScheduleDataErr(res.error);
+        }
+      } 
+      getData();
+  },[currentDate])
   
   function isLeapYear(year) {
       return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
   };
 
-  function getDaysInMonth(year,month){
+  function getDaysInMonth(month){
     const daysInMonth = monthDays[month];
     return (month === 1 && isLeapYear(currentYear)) ? 29 : daysInMonth;
   };
 
   function generateCalendar(){
-    const daysInCurrentMonth = getDaysInMonth(year,month);
+    const daysInCurrentMonth = getDaysInMonth(month);
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const weeks = [];
     let currentDay = 1;
@@ -46,51 +85,7 @@ const Calendar = () => {
     }
     return weeks;
   };
-
-const weeks = generateCalendar();
-const schedulerData = [
-  {
-    client: "Moses Kuria",
-    date: "2024-08-17",
-    filters: ["Ultra 3 filters","Reverse Osmosis","Remineralizing Cartilage","Post Carbon"],
-    cost: "5,768",
-    sales: 590,
-    conversion: 4.8,
-  },
-  {
-    client: "Susan Nakumicha",
-    date: "2024-08-23",
-    filters: ["Ultra 3 filters","Reverse Osmosis","Post Carbon"],
-    cost: "4,635",
-    sales: 467,
-    conversion: 4.3,
-  },
-  {
-    client: "Edwin Sifuna",
-    date: "2024-09-3",
-    filters: ["Ultra 3 filters"],
-    cost: "4,290",
-    sales: 420,
-    conversion: 3.7,
-  },
-  {
-    client: "Kipchumba Murkomen",
-    date: "2024-10-10",
-    filters: ["Ultra 3 filters","Post Carbon"],
-    cost: "3,580",
-    sales: 389,
-    conversion: 2.5,
-  },
-  {
-    client: "Hassan Joho",
-    date: "2024-09-12",
-    filters: ["Reverse Osmosis","Remineralizing Cartilage"],
-    cost: "6,768",
-    sales: 390,
-    conversion: 4.2,
-  },
-];
-
+ 
   return (
     <div className="mx-auto max-w-7xl">
       <div className="flex mb-2">
@@ -107,7 +102,7 @@ const schedulerData = [
       </button>
       </div>
       <Breadcrumb pageName={`scheduler`} additonalRoute={`${year}`} />
-      
+      {scheduleDataErr && <div className="w-fit border border-rose-600 rounded-md m-auto my-3 bg-rose-200 p-3 text-rose-800">{scheduleDataErr}</div>}
       <div className="flex items-center justify-center">
         <button className="px-1 mx-4  bg-primary px-4 py-2 rounded-md text-center text-sm text-white" onClick={()=>setMonth(prevState=> --prevState)} >Previous</button>
         <h1 className="text-3xl py-2 w-full text-black dark:text-slate:400 font-bold text-center">{monthsArray[month]}</h1>
@@ -147,101 +142,108 @@ const schedulerData = [
               </th>
             </tr>
           </thead>
+          { loading ?  
+          <div className="flex h-full items-center justify-center bg-white dark:bg-black">
+            <div className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+            <span className="m-3">Loading...</span>
+           </div>
+           :
           <tbody>
               {
               weeks.length > 1 ? weeks.map((week, index) => (
                 <tr className="grid grid-cols-7" key={index}>
                     {week.map((day, i) => {
-                      let event = schedulerData.filter(e => new Date(e.date).getDate() === day && new Date(e.date).getMonth() === month);
+                      let event = schedulerData.filter(e => new Date(e.filterInfo.soonestDate).getDate() === day && new Date(e.filterInfo.soonestDate).getMonth() === month);
                       return(
                         <td className={ `ease relative h-20 cursor-pointer border border-stroke p-2 transition duration-500 hover:bg-gray dark:border-strokedark dark:hover:bg-meta-4 md:h-25 md:p-6 xl:h-31 ${day === currentDate && month === currentMonth && year === currentYear && 'bg-orange-500'}`} key={i}>
                          <span className="font-medium text-black dark:text-white">{day || ''}</span>
                          {event.length > 0 &&
-                         <div className="group h-16 w-full flex-grow cursor-pointer py-1 md:h-30">
+                         <Link href={`/dashboard/clients/${event[0]._id}`} className="group h-16 w-full flex-grow cursor-pointer py-1 md:h-30">
                             <span className="group-hover:text-primary md:hidden">
                               More
                             </span>
                             <div className="event invisible absolute left-0 z-9 mb-1 flex w-[100%] flex-col rounded-sm border-l-[3px] border-primary text-sm bg-gray px-3 py-1 text-left opacity-0 group-hover:visible group-hover:opacity-100 dark:bg-meta-4 md:visible md:w-fit md:opacity-100">
                               <span className="event-name text-sm font-semibold text-black dark:text-white">
-                                {event[0].client}
+                                {event[0].firstName + " " + event[0].lastName}
                               </span>
                               <span className="time text-sm font-medium text-black dark:text-white">
-                                {event[0].date}
+                                {event[0].filterInfo.filterType}
                               </span>
                             </div>
-                          </div>}
+                          </Link>}
                         </td> )
                   })}
                 </tr>
                 )
               )
-            : <tr>loading...</tr>
+            : <tr>
+                <div className="flex h-full items-center justify-center bg-white dark:bg-black">
+                  <div className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+                  <span className="m-3">Loading...</span>
+                </div>
+              </tr>
             }
           </tbody>
+          }
         </table>
       </div> 
 
       <div className="rounded-sm border my-16 border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-        Upcoming filter change events
-      </h4>
-
-      <div className="flex flex-col">
-        <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-5">
-          <div className="p-2.5 xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Client
-            </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Date
-            </h5>
-          </div>
-          <div className="p-2.5 text-center xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Filters
-            </h5>
-          </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Cost
-            </h5>
-          </div>
-          <div className="hidden p-2.5 text-center sm:block xl:p-5">
-            <h5 className="text-sm font-medium uppercase xsm:text-base">
-              Action
-            </h5>
+        <div className='flex justify-between items-center mb-4'>
+          <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+            Upcoming filter change events
+          </h4>
+          <div className='flex'>
+            <span className='text-rose-600 mx-1'>{`< 7 days`}</span>  |
+            <span className='text-orange-500 mx-1'>{`< 21 days`}</span> |
+            <span className='text-meta-3 mx-1'>{`> 3 weeks`}</span>
           </div>
         </div>
-
-        {schedulerData.map((event, key) => (
-          <div className={`grid grid-cols-3 sm:grid-cols-5 ${key >= schedulerData.length - 1 && "border-b border-stroke dark:border-strokedark"}`} key={key}>
-            <div className="flex items-center gap-3 p-2.5 xl:p-5">
-              <p className="hidden text-black dark:text-white sm:block">
-                {event.client}
-              </p>
+        <div className="flex flex-col">
+          <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-3">
+            <div className="p-2.5 xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                Client
+              </h5>
             </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-black dark:text-white">{event.date}</p>
+            <div className="p-2.5 text-center xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                Date
+              </h5>
             </div>
-
-            <div className="flex items-center justify-center p-2.5 xl:p-5">
-              <p className="text-meta-3">{event.filters.map((filter,index) => <span className=" flex flex-col justify-center my-1" key={index}>-{filter}</span>)}</p>
-            </div>
-
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <p className="text-black dark:text-white">Ksh {event.cost}</p>
-            </div>
-
-            <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
-              <p className="text-meta-5"><Link href="#">Edit</Link></p>
+            <div className="p-2.5 text-center xl:p-5">
+              <h5 className="text-sm font-medium uppercase xsm:text-base">
+                Filters
+              </h5>
             </div>
           </div>
-        ))}
-      </div>
-    </div>  
+
+          {schedulerData.length > 0 ? schedulerData.map((event, key) => (
+            <div className={`grid grid-cols-3 sm:grid-cols-3 ${key >= schedulerData.length - 1 && "border-b border-stroke dark:border-strokedark"}`} key={key}>
+              <div className="flex items-center gap-3 p-2.5 xl:p-5">
+                <p className="hidden text-black dark:text-white sm:block">
+                  {event.firstName + " " + event.lastName}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-center p-2.5 xl:p-5">
+                <p className="text-black dark:text-white">{event.filterInfo.soonestDate.toDateString()}</p>
+              </div>
+
+              <div className="flex items-center justify-center p-2.5 xl:p-5">
+                <p className={`${getDateDiff(event.filterInfo.soonestDate) < 7 ? "text-rose-600" : getDateDiff(event.filterInfo.soonestDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{event.filterInfo.filterType}</p>
+              </div>
+            </div>
+          )):
+          loading ? 
+          <div className="flex h-full items-center justify-center bg-white dark:bg-black">
+            <div className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+            <span className="m-3">Loading...</span>
+          </div>
+          :
+          <div className="w-full border border-rose-600 rounded-md m-auto my-3 bg-rose-200 p-3 text-rose-800">No data at the moment</div>}
+        </div>
+      </div>  
     </div>
   );
 };

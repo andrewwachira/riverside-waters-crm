@@ -137,3 +137,19 @@ export const saveFilterInfo = async ({clientID,clientName,sedimentFilter,u3_Chan
         return {status:500, message:error.message}
     }
 }
+
+export const getScheduleData = async() => {
+    try{
+        await db.connect();
+        const clients  = await Client.find({});
+        const serClients = clients.map(doc=> db.convertClientDocToObj(doc));
+
+        const filters = await Filter.find({});
+        const serFilters  = filters.map(doc1 => db.convertFilterDocToObj(doc1)); 
+        return  {status:200,payload:{clients:serClients,filters:serFilters}};
+    }catch(error){
+        return {status:500, message:error.message}
+    }
+   
+ 
+}

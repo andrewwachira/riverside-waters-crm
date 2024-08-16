@@ -5,7 +5,7 @@ import Client from '@/lib/db/models/Client';
 import Filter from '@/lib/db/models/Filter';
 import Test from '@/lib/db/models/Test';
 import Link from 'next/link';
-import moment from "moment";
+import { getDateDiff } from '@/lib/utils';
 
 async function Clients({params}) {
   
@@ -13,12 +13,7 @@ async function Clients({params}) {
   const client = await Client.findById(params.id);
   const filterInfo = await Filter.findOne({clientId:params.id});
 
-  function getDiff(date){
-    const incomingDate = moment(date);
-    const current = moment().startOf('day');
-    var daysDiff = moment.duration(incomingDate.diff(current)).asDays();
-    return daysDiff
-  }
+ 
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Clients" additonalRoute={client.firstName}/>
@@ -84,8 +79,8 @@ async function Clients({params}) {
           <div className='flex justify-between items-center mb-4'>
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white"> Filter Information</h4>
             <div className='flex'>
-              <span className='text-rose-600 mx-1'>{`< 7 days`}</span>
-              <span className='text-orange-500 mx-1'>{`< 21 days`}</span>
+              <span className='text-rose-600 mx-1'>{`< 7 days`}</span> | 
+              <span className='text-orange-500 mx-1'>{`< 21 days`}</span> |
               <span className='text-meta-3 mx-1'>{`> 3 weeks`}</span>
             </div>
           </div>
@@ -93,51 +88,37 @@ async function Clients({params}) {
           <div className="flex w-full">
               <div className="grid grid-row-5 rounded-sm bg-gray-2 dark:bg-meta-4 w-full">
                 <div className="p-2.5 border-b border-stroke ">
-                  <h5 className="text-sm font-medium uppercase xsm:text-base">
-                    Sediment Filter present
-                  </h5>
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Sediment Filter present</h5>
                 </div>
                 <div className="p-2.5 border-b border-stroke">
-                  <h5 className="text-sm font-medium uppercase xsm:text-base">
-                    Ultra 3 Change Date
-                  </h5>
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Ultra 3 Change Date</h5>
                 </div>
                 <div className="p-2.5 border-b border-stroke">
-                  <h5 className="text-sm font-medium uppercase xsm:text-base">
-                    Reverse Osmosis Change date
-                  </h5>
+                  <h5 className="text-sm font-medium uppercase xsm:text-base"> Reverse Osmosis Change date </h5>
                 </div>
                 <div className=" p-2.5 border-b border-stroke">
-                  <h5 className="text-sm font-medium uppercase xsm:text-base">
-                    Post Carbon Change date
-                  </h5>
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Post Carbon Change date</h5>
                 </div>
-              
                 <div className=" p-2.5 border-b border-stroke">
-                  <h5 className="text-sm font-medium uppercase xsm:text-base">
-                    Remineralizing Cartilage
-                  </h5>
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Remineralizing Cartilage </h5>
                 </div>
               </div> 
+
               <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
                 <div className="border-b border-stroke flex tems-center justify-center p-2.5">
                   <p className={`text-black dark:text-white sm:block`}>{filterInfo.sedimentFilter ? "Yes" : "No"}</p>
                 </div>
-
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.u3_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.u3_ChangeDate).toDateString()}</p>
                 </div>
-
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.ro_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.ro_ChangeDate).toDateString()}</p>
                 </div>
-
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.pc_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.pc_ChangeDate).toDateString()}</p>
                 </div>
-
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.rc_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.rc_ChangeDate).toDateString()}</p>
                 </div>
               </div>
             </div>
