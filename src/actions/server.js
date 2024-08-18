@@ -83,8 +83,22 @@ export const getClients = async () => {
         }
         await db.connect();
         const clients = await Client.find({});
-        const serialized = clients.map(doc=> db.convertClientDocToObj(doc));
-       return (serialized);
+        const serClients = [];
+        clients.forEach(client => {
+            const serialized ={
+                _id: client._id.toString(),
+                createdAt: client.createdAt.toDateString(),
+                updatedAt: client.updatedAt.toDateString(),
+                firstName: client.firstName,
+                lastName: client.lastName,
+                phoneNumber: client.phoneNumber,
+                residence: client.residence,
+                contactName: client.contactPerson.name,
+                contactCell: client.contactPerson.phoneNumber,
+            }
+            serClients.push(serialized);
+        })
+       return (serClients);
         
     } catch (error) {
         return {error:error.message};
@@ -112,7 +126,7 @@ export const saveFilterInfo = async ({clientID,clientName,sedimentFilter,u3_Chan
                     }
                 ]
             });
-            const res =  await filterInfo.save();
+            await filterInfo.save();
             return {status:201,message:`Filter information for ${clientName} saved successfully`}
         }else{
            const res = await prevInfo.updateOne({clientId:clientID},{
@@ -196,7 +210,12 @@ export const getClientData = async(clientId)=> {
             _id : client._id.toString(),
             createdAt : client.createdAt.toDateString(),    
             updatedAt : client.updatedAt.toDateString(),
-            ...client
+            firstName : client.firstName,
+            lastName : client.lastName,
+            phoneNumber : client.phoneNumber,
+            residence : client.residence,
+            contactName : client.contactPerson.name,
+            contactCell : client.contactPerson.phoneNumber,
         }
         return {status:200, client: serClient};
     } catch (error) {

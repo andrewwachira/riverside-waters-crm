@@ -28,8 +28,8 @@ function EditClientInfo({params}) {
         setValue("lastName",res.client.lastName);
         setValue("phoneNumber",res.client.phoneNumber);
         setValue("residence",res.client.residence);
-        setValue("contactName",res.client.contactPerson.name);
-        setValue("contactCell",res.client.contactPerson.phoneNumber);
+        setValue("contactName",res.client.contactName);
+        setValue("contactCell",res.client.contactCell);
       }else{
         setFetchError(res.error);
       }

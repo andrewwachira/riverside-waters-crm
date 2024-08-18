@@ -74,7 +74,7 @@ async function Clients({params}) {
           <Link href={`/dashboard/clients/${client._id}/edit-client-info`} className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Client Details</Link>
 
         </div>
-        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
+        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 mb-7 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
           <div className='flex justify-between items-center mb-4'>
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white"> Filter Information</h4>
             <div className='flex'>
@@ -123,6 +123,13 @@ async function Clients({params}) {
             </div>
             <Link href={`/dashboard/clients/${client._id}/edit-filter-info`}  className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Filter Information</Link>
         </div>
+
+        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
+            <h4 className="mb-6 text-xl font-semibold text-black dark:text-white"> Test Information</h4>
+            <div className='flex w-full'>
+              <div className="w-full border border-rose-600 rounded-md m-auto mx-4 mb-4 text-center my-3 bg-rose-200 p-3 text-rose-800">No Test Details Yet</div>
+            </div>
+        </div >
     </div>
     </DefaultLayout>
   )
