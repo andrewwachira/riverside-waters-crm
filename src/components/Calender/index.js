@@ -3,7 +3,6 @@ import Breadcrumb from "../Breadcrumbs/Breadcrumb";
 import {useState,useEffect} from "react";
 import Link from "next/link";
 import { getScheduleData } from "@/actions/server";
-// import { Loader} from "@/components/common/Loader";
 import { getDateDiff } from "@/lib/utils";
 
 const Calendar = () => {
@@ -19,7 +18,7 @@ const Calendar = () => {
   const [scheduleDataErr,setScheduleDataErr] = useState(null);
   const [loading,setLoading] = useState(false);
   const [weeks,setWeeks] = useState(generateCalendar());
-
+  console.log(schedulerData);
   useEffect(()=>{
       async function getData(){
         setLoading(true);
@@ -31,14 +30,16 @@ const Calendar = () => {
           filters = payload.filters;
           for (let client of clients) {
             for(let filter of filters){
-              let filterEventIndex = ["Ultra 3 filters","Reverse Osmosis","Post Carbon","Remineralizing Cartilage"];
-              let filterEventArr = [filter.u3_ChangeDate,filter.ro_ChangeDate,filter.pc_ChangeDate,filter.rc_ChangeDate];
-              let soonestDate = filterEventArr.reduce((soonest, date) => {
-                return date > currentDate && (soonest === null || date < soonest) ? date : soonest;
-              }, null);
-              let filterEvent = filterEventArr.findIndex(date => date === soonestDate );
-              filter.filterType = filterEventIndex[filterEvent];
-              filter.soonestDate = soonestDate
+              let filterEventArr = [
+                  {date:filter.u3_ChangeDate,name:"Ultra 3 filters"},
+                  {date:filter.ro_ChangeDate,name:"Reverse Osmosis"},
+                  {date:filter.pc_ChangeDate,name:"Post Carbon"},
+                  {date:filter.rc_ChangeDate,name:"Remineralizing Cartilage"}
+              ];
+              let filterEventArr2 = [filter.u3_ChangeDate,filter.ro_ChangeDate,filter.pc_ChangeDate,filter.rc_ChangeDate];
+              filter.filterEvents = filterEventArr.sort((a,b)=> new Date(a.date)- new Date(b.date));
+              filter.filterEventsArr = filterEventArr2.sort((a,b)=> new Date(a)- new Date(b));
+              filter.soonestDate = filterEventArr[0].date;
               if(client._id == filter.clientId){
                 client.filterInfo = filter;
               }
@@ -85,7 +86,7 @@ const Calendar = () => {
     }
     return weeks;
   };
- 
+
   return (
     <div className="mx-auto max-w-7xl">
       <div className="flex mb-2">
@@ -153,34 +154,36 @@ const Calendar = () => {
               weeks.length > 1 ? weeks.map((week, index) => (
                 <tr className="grid grid-cols-7" key={index}>
                     {week.map((day, i) => {
-                      let event = schedulerData.filter(e => new Date(e.filterInfo.soonestDate).getDate() === day && new Date(e.filterInfo.soonestDate).getMonth() === month);
+                      const events = schedulerData.filter(client => client.filterInfo.filterEvents.some(event =>   new Date(event.date).getDate() === day && new Date(event.date).getMonth() === month && new Date(event.date).getFullYear() === year));
+
                       return(
                         <td className={ `ease relative h-20 cursor-pointer border border-stroke p-2 transition duration-500 hover:bg-gray dark:border-strokedark dark:hover:bg-meta-4 md:h-25 md:p-6 xl:h-31 ${day === currentDate && month === currentMonth && year === currentYear && 'bg-orange-500'}`} key={i}>
                          <span className="font-medium text-black dark:text-white">{day || ''}</span>
-                         {event.length > 0 &&
-                         <Link href={`/dashboard/clients/${event[0]._id}`} className="group h-16 w-full flex-grow cursor-pointer py-1 md:h-30">
+                         { events.length > 0 && events.map((event,idx) => (
+                         <Link href={`/dashboard/clients/${event._id}`}  key={idx} className="group h-16 w-full flex-grow cursor-pointer py-1 md:h-30">
                             <span className="group-hover:text-primary md:hidden">
                               More
-                            </span>
-                            <div className="event invisible absolute left-0 z-9 mb-1 flex w-[100%] flex-col rounded-sm border-l-[3px] border-primary text-sm bg-gray px-3 py-1 text-left opacity-0 group-hover:visible group-hover:opacity-100 dark:bg-meta-4 md:visible md:w-fit md:opacity-100">
+                            </span>                           
+                             <span className="event invisible absolute left-0 z-9 mb-1 flex w-[100%] flex-col rounded-sm border-l-[3px] border-primary text-sm bg-gray px-3 py-1 text-left opacity-0 group-hover:visible group-hover:opacity-100 dark:bg-meta-4 md:visible md:w-fit md:opacity-100">
                               <span className="event-name text-sm font-semibold text-black dark:text-white">
-                                {event[0].firstName + " " + event[0].lastName}
+                                {event.firstName + " " + event.lastName}
                               </span>
                               <span className="time text-sm font-medium text-black dark:text-white">
-                                {event[0].filterInfo.filterType}
+                                {event.filterInfo.filterEvents.find(evt => new Date(evt.date).getDate() === day && new Date(evt.date).getMonth() === month && new Date(evt.date).getFullYear() === year)?.name}
                               </span>
-                            </div>
-                          </Link>}
+                            </span>
+                          </Link>
+                          ))}
                         </td> )
                   })}
                 </tr>
                 )
               )
             : <tr>
-                <div className="flex h-full items-center justify-center bg-white dark:bg-black">
-                  <div className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+                <span className="flex h-full items-center justify-center bg-white dark:bg-black">
+                  <span className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></span>
                   <span className="m-3">Loading...</span>
-                </div>
+                </span>
               </tr>
             }
           </tbody>
@@ -222,16 +225,16 @@ const Calendar = () => {
             <div className={`grid grid-cols-3 sm:grid-cols-3 ${key >= schedulerData.length - 1 && "border-b border-stroke dark:border-strokedark"}`} key={key}>
               <div className="flex items-center gap-3 p-2.5 xl:p-5">
                 <p className="hidden text-black dark:text-white sm:block">
-                  {event.firstName + " " + event.lastName}
+                  {event?.firstName + " " + event?.lastName}
                 </p>
               </div>
 
               <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className="text-black dark:text-white">{event.filterInfo.soonestDate.toDateString()}</p>
+                <p className="text-black dark:text-white">{(event?.filterInfo?.filterEvents[0]?.date)}</p>
               </div>
 
               <div className="flex items-center justify-center p-2.5 xl:p-5">
-                <p className={`${getDateDiff(event.filterInfo.soonestDate) < 7 ? "text-rose-600" : getDateDiff(event.filterInfo.soonestDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{event.filterInfo.filterType}</p>
+                <p className={`${getDateDiff(event?.filterInfo?.filterEvents[0].date) < 7 ? "text-rose-600" : getDateDiff(event?.filterInfo?.filterEvents[0].date) < 21 ? "text-orange-500" : "text-meta-3"}`}>{event?.filterInfo?.filterEvents[0].name}</p>
               </div>
             </div>
           )):

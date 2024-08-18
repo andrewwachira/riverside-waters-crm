@@ -90,7 +90,6 @@ function Forms() {
                 }
             }
             for (let item of unfilled){
-                console.log(typeof(item));
                 if(item == "u3") setU3(true);
                 if(item == "ro") setRo(true);
                 if(item == "pc") setPc(true);
@@ -232,9 +231,9 @@ function Forms() {
                         </div>
                         <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white hover:bg-opacity-90">Save Filter Info</button>
                     </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
         <div className="flex m-5 flex-col gap-9">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div onClick={()=>setTestFormOpen(!testFormOpen)} className="border-b border-stroke bg-blue-700 rounded-md text- px-6.5 py-4 dark:border-strokedark flex justify-between">

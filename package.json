@@ -11,7 +11,6 @@
   "dependencies": {
     "@nextui-org/date-picker": "^2.1.6",
     "@uploadthing/react": "^6.7.2",
-    "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "crypto-js": "^4.2.0",
     "flatpickr": "^4.6.13",

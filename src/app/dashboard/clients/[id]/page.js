@@ -13,7 +13,6 @@ async function Clients({params}) {
   const client = await Client.findById(params.id);
   const filterInfo = await Filter.findOne({clientId:params.id});
 
- 
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Clients" additonalRoute={client.firstName}/>
@@ -106,23 +105,23 @@ async function Clients({params}) {
 
               <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
                 <div className="border-b border-stroke flex tems-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white sm:block`}>{filterInfo.sedimentFilter ? "Yes" : "No"}</p>
+                  <p className={`text-black dark:text-white sm:block`}>{filterInfo?.sedimentFilter ? "Yes" : "No"}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.u3_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.u3_ChangeDate)?.toDateString()}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.ro_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.ro_ChangeDate)?.toDateString()}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.pc_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.pc_ChangeDate)?.toDateString()}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo.rc_ChangeDate).toDateString()}</p>
+                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.rc_ChangeDate)?.toDateString()}</p>
                 </div>
               </div>
             </div>
-            <button className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Filter Information</button>
+            <Link href={`/dashboard/clients/${client._id}/edit-filter-info`}  className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Filter Information</Link>
         </div>
     </div>
     </DefaultLayout>
