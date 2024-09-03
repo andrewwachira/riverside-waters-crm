@@ -8,7 +8,7 @@ import { auth } from "@/auth";
 export default async function Home() {
   const session = await auth();
   return (
-    <main className=" min-h-screen grid grid-cols-1 md:grid-cols-2 justify-between">
+    <main className=" min-h-screen grid grid-cols-1 md:grid-cols-2 justify-between dark:bg-boxdark-2 dark:text-bodydark">
         <section className="gradient-home ">
           <div style={{backgroundImage:`url(${bg1.src})`, backgroundSize:"cover"}} className="flex flex-col h-screen items-center justify-around">
             <h1 className={`text-5xl text-white text-center mt-10 flex justify-around ${satoshi.className} tracking-[0.3em]`}>Riverside  Water</h1>

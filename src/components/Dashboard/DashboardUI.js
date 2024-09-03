@@ -6,7 +6,7 @@ import React from "react";
 // import ChatCard from "../Chat/ChatCard";
 import TableOne from "../Tables/TableOne";
 import CardDataStats from "../CardDataStats";
-
+import useColorMode from "@/hooks/useColorMode";
 // const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
 //   ssr: false,
 // });
@@ -16,6 +16,7 @@ import CardDataStats from "../CardDataStats";
 // });
 
 const DashboardUI = () => {
+  const [colorMode, setColorMode] = useColorMode();
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">

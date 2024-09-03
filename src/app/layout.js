@@ -3,6 +3,9 @@ import localFont from "next/font/local";
 import {SessionProvider} from "next-auth/react";
 import { auth } from "@/auth";
 import "@/css/globals.css"
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { allFilesRouter } from "@/app/api/uploadthing/core";
 
 const inter = Inter({ subsets: ["latin"] });
 export const satoshi = localFont({
@@ -42,7 +45,11 @@ export default async function RootLayout({ children }) {
   return (
     <SessionProvider session={session}>
       <html lang="en">
-        <body className={satoshi.className}>{children}</body>
+        <body className={satoshi.className}>
+        <NextSSRPlugin
+          routerConfig={extractRouterConfig(allFilesRouter)}
+        />
+        {children}</body>
       </html>
     </SessionProvider>
   );

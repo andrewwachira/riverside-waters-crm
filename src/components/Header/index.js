@@ -4,7 +4,7 @@ import Image from "next/image"
 
 const Header = props => {
   return (
-    <header className="sticky z-99 top-0  flex bg-white drop-shadow-md ">
+    <header className="sticky z-99 top-0  flex bg-white drop-shadow-md dark:bg-boxdark dark:drop-shadow-none">
       <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           {/* <!-- Hamburger Toggle BTN --> */}

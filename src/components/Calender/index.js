@@ -4,8 +4,9 @@ import {useState,useEffect} from "react";
 import Link from "next/link";
 import { getScheduleData } from "@/actions/server";
 import { getDateDiff } from "@/lib/utils";
-
+import useColorMode from "@/hooks/useColorMode";
 const Calendar = () => {
+  const [colorMode, setColorMode] = useColorMode();
   const [month,setMonth] = useState(new Date().getMonth());
   const [year,setYear] = useState(new Date().getFullYear());
   const monthsArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -18,7 +19,7 @@ const Calendar = () => {
   const [scheduleDataErr,setScheduleDataErr] = useState(null);
   const [loading,setLoading] = useState(false);
   const [weeks,setWeeks] = useState(generateCalendar());
-  console.log(schedulerData);
+  
   useEffect(()=>{
       async function getData(){
         setLoading(true);
@@ -106,7 +107,7 @@ const Calendar = () => {
       {scheduleDataErr && <div className="w-fit border border-rose-600 rounded-md m-auto my-3 bg-rose-200 p-3 text-rose-800">{scheduleDataErr}</div>}
       <div className="flex items-center justify-center">
         <button className="px-1 mx-4  bg-primary px-4 py-2 rounded-md text-center text-sm text-white" onClick={()=>setMonth(prevState=> --prevState)} >Previous</button>
-        <h1 className="text-3xl py-2 w-full text-black dark:text-slate:400 font-bold text-center">{monthsArray[month]}</h1>
+        <h1 className="text-3xl py-2 w-full text-black dark:text-slate:400 font-bold text-center dark:text-white dark:font-thin">{monthsArray[month]}</h1>
         <button className="px-1 mx-4 bg-primary px-4 py-2 rounded-md text-center text-sm text-white" onClick={()=>setMonth(prevState=> ++prevState)}>Next</button>
       </div>
        <div className="w-full max-w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">

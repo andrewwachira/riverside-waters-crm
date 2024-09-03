@@ -6,6 +6,7 @@ import bcryptjs from "bcryptjs";
 import { signIn,auth } from "@/auth";
 import CryptoJS from "crypto-js";
 import Filter from "@/lib/db/models/Filter";
+import System from "@/lib/db/models/System";
 
 
 export async function createUser(name, email, phoneNumber,password) {
@@ -52,7 +53,14 @@ export const login = async (email,pass) => {
     }
     
 }
-
+export const sendResetLink = async (email) => {
+    try{
+        
+    }catch(error){
+        return {message:error.message,status:500};
+    }
+    
+}
 
 export const createClientForm1 = async (firstName,lastName,phoneNumber,residence,contactName,contactCell) => {
     try {
@@ -282,6 +290,16 @@ export const editFilterData = async({clientId,sedimentFilter,u3_ChangeDate,ro_Ch
             sedimentFilter,u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate,
         })
         return{status:200}
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}
+
+export const systemDefaults = async()=> {
+    try {
+        await db.connect();
+        const system = await System.findOne().select("googleSignIn");
+        return{status:200,system}
     } catch (error) {
         return {status:500,error:error.message}
     }

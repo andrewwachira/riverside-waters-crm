@@ -5,6 +5,7 @@ function Dashboard() {
   return (
     <DefaultLayout>
       <DashboardUI/>
+      <div className='h-[50vh]'></div>
     </DefaultLayout>
   )
 }

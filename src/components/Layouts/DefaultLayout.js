@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState} from "react"
 import Sidebar from "@/components/Sidebar"
 import Header from "@/components/Header"
 
@@ -20,9 +20,9 @@ export default function DefaultLayout({ children }) {
           {/* <!-- ===== Header End ===== --> */}
 
           {/* <!-- ===== Main Content Start ===== --> */}
-          <main>
+          <main className="dark:bg-boxdark-2 dark:text-bodydark max-h-full">
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-              {children}
+                {children}
             </div>
           </main>
           {/* <!-- ===== Main Content End ===== --> */}

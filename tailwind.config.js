@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 import defaultTheme from "tailwindcss/defaultTheme";
-
-module.exports = {
+import { withUt } from "uploadthing/tw";
+module.exports = withUt({
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -331,4 +331,4 @@ module.exports = {
     },
   },
   plugins: [],
-};
+});

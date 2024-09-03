@@ -3,8 +3,11 @@ import {useState,useEffect} from 'react';
 import DatePicker from '../FormElements/DatePicker/DatePicker';
 import { useForm } from 'react-hook-form';
 import { createClientForm1,getClients, saveFilterInfo } from '@/actions/server';
+import useColorMode from '@/hooks/useColorMode';
+import { UploadButton } from '@/lib/utils/uploadthing';
 
 function Forms() {
+    const [colorMode, setColorMode] = useColorMode();
     const {register,handleSubmit,formState:{errors}} = useForm();
     const {register:register3,handleSubmit:handleSubmit3,formState:{errors:errors3}} = useForm();
     const [clientFormOpen,setClientFormOpen] = useState(false); 
@@ -30,7 +33,7 @@ function Forms() {
         }
      fetchClients()
      
-    },[])
+    },[colorMode])
 
     const addRow = () =>{
         const newRow = {
@@ -47,8 +50,18 @@ function Forms() {
                     </div>
                     <div className="w-full xl:w-1/2">
                         <label name={`testFile${nextId}`} className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Test Result</label>
-                        <input type="file" className="block w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 "/>                           
+                        <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 " endpoint="imageUploader" onClientUploadComplete={(res) => {
+                        // Do something with the response
+                        console.log("Files: ", res);
+                        alert("Upload Completed");
+                        }}
+                            onUploadError={(error) => {
+                            // Do something with the error.
+                            alert(`ERROR! ${error.message}`);
+                            }}
+                        />
                     </div>
+                    
                     <div>
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">Action</label>
                         <button type='button' onClick={()=>setInputRows(inputRows.filter((row)=>(row.id !== nextId)))} className='text-white bg-rose-500 rounded-md py-3 px-5'>Remove</button>
@@ -275,7 +288,13 @@ function Forms() {
                             </div>
                             <div className="mb-4.5 w-full xl:w-1/2">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Floride Test Results</label>
-                                <input type="file" className="block w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 "/>                           
+                                <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 " endpoint="imageUploader" 
+                                onClientUploadComplete={(res) => {console.log(res);alert("Upload Completed");
+                                    }} onUploadError={(error) => {
+                                    // Do something with the error.
+                                    alert(`ERROR! ${error.message}`);
+                                    }}
+                                />                            
                             </div>
                         </div>
                         <div className=' heading-separator'> Other Tests</div>
@@ -284,12 +303,13 @@ function Forms() {
                         </div>
                         
                     
-                        <button id="addInputButton" type='button' onClick={()=>addRow()} className="flex w-full justify-center rounded bg-white transition ease-in-out duration-500 text-orange-700 border border-orange-600 p-3 my-7 font-medium text-gray hover:bg-opacity-90 hover:bg-orange-600 hover:text-white">Add Test Field</button>
+                        <button id="addInputButton" type='button' onClick={()=>addRow()} className="flex w-full justify-center rounded bg-white transition ease-in-out duration-500 text-orange-700 border border-orange-600 p-3 my-7 font-medium text-gray hover:bg-opacity-90  hover:bg-orange-600 hover:text-white">Add Test Field</button>
                         <button className="flex w-full justify-center rounded bg-primary p-3 my-7 font-medium text-gray hover:bg-opacity-90">Save Test Records</button>
                 </div>
             </form>
         </div>
     </div>
+    <div className='h-[50vh]'></div>
 </div>
   )
 }

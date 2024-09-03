@@ -77,7 +77,7 @@ async function Clients() {
             </div>
 
             <div className="hidden items-center justify-center md:block p-2.5 xl:p-5">
-              <p className="text-black text-center">{client.residence}</p>
+              <p className="text-black text-center dark:text-white">{client.residence}</p>
             </div>
 
             <div className="hidden items-center justify-center p-2.5 md:block xl:p-5">
@@ -92,6 +92,7 @@ async function Clients() {
       </div>
       }
     </div>
+    <div className='h-[50vh]'></div>
     </DefaultLayout>
   )
 }

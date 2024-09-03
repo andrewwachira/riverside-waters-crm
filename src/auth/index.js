@@ -5,6 +5,8 @@ import User from "@/lib/db/models/User";
 import bcrypt from "bcryptjs";
 import CryptoJS from "crypto-js";
 import { CredentialsSignin } from "@auth/core/errors";
+import Google from "next-auth/providers/google";
+import System from "@/lib/db/models/System";
 
 class CustomError extends CredentialsSignin {
     code = "custom"
@@ -22,6 +24,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy:"jwt"
 },
 callbacks:{
+    async signIn({account,profile}){
+      console.log("profile: " ,profile);
+      if (account.provider === "google") {
+        if(!profile){
+            throw new Error("There is no such profile")
+        }
+        try {
+          await db.connect();
+          const totalAdmins = User.countDocuments();
+          const system = System.findOne({});
+          const user = await User.findOne({email:profile.email});
+          await db.disconnect();
+          if(!user && totalAdmins >= system.adminAccounts ){
+                throw new Error("Additional admins are not allowed")
+          }
+          if(!user.image){
+            await user.updateOne({image:profile.image});
+          }
+          return true;
+        } catch (error) {
+            console.log(error);
+            return false
+        }
+    }
+        return true
+    
+    },
     async jwt({token,user}){
         if(user?._id) token._id = user._id;
         if(user?.iSupersAdmin) token.isSuperAdmin  = user.isSuperAdmin;
@@ -69,5 +98,6 @@ callbacks:{
                 }
         },
       }),
+      Google
   ],
 })
