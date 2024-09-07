@@ -3,6 +3,8 @@ import Link from "next/link"
 import ClickOutside from "@/components/ClickOutside"
 import { signOut,useSession } from "next-auth/react"
 import { useRouter } from "next/navigation";
+import avatar from "../../../public/images/avatar.png"
+import Image from "next/image";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -24,12 +26,13 @@ const DropdownUser = () => {
           <span className="block text-sm font-medium text-black dark:text-white">
           {session?.data?.user?.name}
           </span>
-          <span className="block text-xs">Root Admin</span>
+          <span className="block text-xs">
+            {session?.user?.isSuperAdmin ? "Root Admin" : "Sub Admin"}
+          </span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img  width={112} height={112} src={`${session?.data?.user?.image}`} style={{ width: "auto",clipPath:"circle()", height: "auto"}}alt="User"/>
+          <Image  width={112} height={112} src={`${session?.data?.user?.image ? session?.data?.user?.image : avatar.src}`} style={{ width: "auto",clipPath:"circle()", height: "auto"}}alt="User"/>
         </span>
 
         <svg className="hidden fill-current sm:block" width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">

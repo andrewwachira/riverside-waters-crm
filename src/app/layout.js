@@ -6,6 +6,7 @@ import "@/css/globals.css"
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { allFilesRouter } from "@/app/api/uploadthing/core";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 export const satoshi = localFont({
@@ -46,9 +47,8 @@ export default async function RootLayout({ children }) {
     <SessionProvider session={session}>
       <html lang="en">
         <body className={satoshi.className}>
-        <NextSSRPlugin
-          routerConfig={extractRouterConfig(allFilesRouter)}
-        />
+        <NextSSRPlugin routerConfig={extractRouterConfig(allFilesRouter)} />
+        <Toaster position="bottom-center"/>
         {children}</body>
       </html>
     </SessionProvider>

@@ -304,3 +304,55 @@ export const systemDefaults = async()=> {
         return {status:500,error:error.message}
     }
 }
+
+export const setGoogleSignIn = async(choice)=> {
+    try {
+        await db.connect();
+        const system = await System.findOne();
+        await system.updateOne({googleSignIn:choice});
+        return{status:200}
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}
+
+export const removeAdminSlot = async()=> {
+    try {
+        await db.connect();
+        const system = await System.findOne();
+        const accounts = system.adminAccounts;
+        await system.updateOne({adminAccounts:accounts-1});
+        return{status:200}
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}
+
+export const addAdminSlot = async()=> {
+    try {
+        await db.connect();
+        const system = await System.findOne();
+        const accounts = system.adminAccounts;
+        await system.updateOne({adminAccounts:accounts+1});
+        return{status:200}
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}
+
+export const deleteAdmin = async(id,loggedUser)=> {
+    try {
+        await db.connect();
+        const loggedUser = await User.findById(loggedUser);
+        if(loggedUser.email !== "drwangeci@gmail.com" && !loggedUser.isSuperAdmin){
+            throw new Error ("This operation is only priveleged to the Root admin of the system");
+        }else{
+            await User.findByIdAndDelete(id);
+            return{status:200};
+        }
+       
+       
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}

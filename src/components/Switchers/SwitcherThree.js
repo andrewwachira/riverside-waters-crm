@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-const SwitcherThree = () => {
-  const [enabled, setEnabled] = useState(false);
+const SwitcherThree = ({enableGoogleSignin,defaultChoice}) => {
+  const [enabled, setEnabled] = useState(defaultChoice);
 
   return (
     <div>
@@ -16,6 +16,7 @@ const SwitcherThree = () => {
             className="sr-only"
             onChange={() => {
               setEnabled(!enabled);
+              enableGoogleSignin(!enabled)
             }}
           />
           <div className="block h-8 w-14 rounded-full bg-meta-9 dark:bg-[#5A616B]"></div>
