@@ -22,11 +22,15 @@ function EditProfile() {
       setEmail(data.email);
       setImage(data.image);
     }
-    fetchData()
+    fetchData();
   },[ setValue])
 
-  const saveProfileInfo = async ({name,phoneNumber,bio,}) => {
-
+  const saveProfileInfo = async ({name,phoneNumber,bio,email}) => {
+    const res = await editUserProfile(name,phoneNumber,bio,email);
+    if(res.status === 200){
+      toast.success("Your info has been updated successfully");
+      router.push("/dashoard/profile");
+    }
   }
   return (
     <DefaultLayout>
@@ -133,8 +137,8 @@ function EditProfile() {
                 <form action="#">
                   <div className="mb-4 flex items-center gap-3">
                     <div className="h-14 w-14 rounded-full">
-                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={image ? image : avatar.src} width={55}  height={55} alt="User"/>
+                      
+                      <Image src={image ? image : avatar.src} width={55}  height={55} alt="User"/>
                     </div>
                     <div>
                       <span className="mb-1.5 text-black dark:text-white">

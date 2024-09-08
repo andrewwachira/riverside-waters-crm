@@ -6,10 +6,14 @@ import Link from 'next/link'
 import { auth } from '@/auth'
 import bg1 from "../../../../public/images/pattern2.png";
 import avatar from "../../../../public/images/avatar.png";
+import db from '@/lib/db'
+import User from '@/lib/db/models/User';
 
 async function Profile() {
   const session = await auth();
-  console.log(session.user.image);
+  await db.connect();
+  const me = await User.find({email:session.user.email});
+
   return (
     <DefaultLayout>
         <Breadcrumb pageName={"profile"}/>
@@ -28,43 +32,18 @@ async function Profile() {
                { session?.user?.name}
               </h3>
               <p className="font-medium">{session?.user?.isSuperAdmin ?  "Root admin" : "sub admin"}</p>
-              <div className="mx-auto mb-5.5 mt-4.5 grid max-w-94 grid-cols-3 rounded-md border border-stroke py-2.5 shadow-1 dark:border-strokedark dark:bg-[#37404F]">
-                <div className="flex flex-col items-center justify-center gap-1 border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
-                  <span className="font-semibold text-black dark:text-white">
-                    259
-                  </span>
-                  <span className="text-sm">Posts</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-1 border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
-                  <span className="font-semibold text-black dark:text-white">
-                    129K
-                  </span>
-                  <span className="text-sm">Followers</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
-                  <span className="font-semibold text-black dark:text-white">
-                    2K
-                  </span>
-                  <span className="text-sm">Following</span>
-                </div>
-              </div>
 
               <div className="mx-auto max-w-180">
                 <h4 className="font-semibold text-black dark:text-white">
                   About Me
                 </h4>
                 <p className="mt-4.5">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Pellentesque posuere fermentum urna, eu condimentum mauris
-                  tempus ut. Donec fermentum blandit aliquet. Etiam dictum
-                  dapibus ultricies. Sed vel aliquet libero. Nunc a augue
-                  fermentum, pharetra ligula sed, aliquam lacus.
+                  {me?.bio}
                 </p>
               </div>
               <div className='flex'>
                 <Link href="/dashboard/profile/edit" className=' relative z-30 rounded-md m-auto z-999 bg-blue-600 px-4 py-2 my-4 hover:opacity-90 flex w-fit text-white'>Edit profile</Link>
                 <Link href="/dashboard/profile/change-password" className=' relative z-30 rounded-md m-auto z-999 bg-rose-600 px-4 py-2 my-4 hover:opacity-90 flex w-fit text-white'>Change password</Link>
-
               </div>
 
             </div>

@@ -27,7 +27,7 @@ export default function SignIn(){
       router.push("/dashboard");
     }
     const getSystemData = async ()=> {
-      const data = await systemDefaults()
+      const data = await fetch("/api/system/getLoginDefaults");
       setSystemData(data.system);
     }
     getSystemData()

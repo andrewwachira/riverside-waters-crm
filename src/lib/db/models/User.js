@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
         isSubAdmin:{type:Boolean,default:false}, 
         isAuthenticated:{type:Boolean,default:false},
         image:{type:String},
+        bio:{type:String},
     },
     {
         timestamps:true

@@ -57,6 +57,7 @@ callbacks:{
         if(user?.isAuthenticated) token.isAuthenticated = user.isAuthenticated;
         if(user?.image) token.image = user.image;
         if(user?.phoneNumber) token.phoneNumber = user.phoneNumber;
+        if(user?.email) token.email = user.email;
         if(user?.createdAt) token.createdAt = user.createdAt;
         return token;
     },
@@ -66,6 +67,7 @@ callbacks:{
         if(token?.isAuthenticated) session.user.isAuthenticated = token.isAuthenticated;
         if(token?.image) session.user.image = token.image;
         if(token?.phoneNumber) session.user.phoneNumber = token.phoneNumber;
+        if(token?.email) session.email = token.email;
         if(token?.createdAt) session.user.createdAt = token.createdAt;
         return session;
     }

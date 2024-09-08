@@ -295,16 +295,6 @@ export const editFilterData = async({clientId,sedimentFilter,u3_ChangeDate,ro_Ch
     }
 }
 
-export const systemDefaults = async()=> {
-    try {
-        await db.connect();
-        const system = await System.findOne().select("googleSignIn");
-        return{status:200,system}
-    } catch (error) {
-        return {status:500,error:error.message}
-    }
-}
-
 export const setGoogleSignIn = async(choice)=> {
     try {
         await db.connect();
@@ -340,10 +330,10 @@ export const addAdminSlot = async()=> {
     }
 }
 
-export const deleteAdmin = async(id,loggedUser)=> {
+export const deleteAdmin = async(id,email)=> {
     try {
         await db.connect();
-        const loggedUser = await User.findById(loggedUser);
+        const loggedUser = await User.find({email});
         if(loggedUser.email !== "drwangeci@gmail.com" && !loggedUser.isSuperAdmin){
             throw new Error ("This operation is only priveleged to the Root admin of the system");
         }else{
@@ -352,6 +342,16 @@ export const deleteAdmin = async(id,loggedUser)=> {
         }
        
        
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}
+
+export const editUserProfile = async(name,phoneNumber,bio,email)=> {
+    try {
+        await db.connect();
+        const user = await User.findOneAndUpdate({email},{name,phoneNumber:Number(phoneNumber),bio});
+        return{status:200,user};
     } catch (error) {
         return {status:500,error:error.message}
     }
