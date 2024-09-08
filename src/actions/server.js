@@ -8,7 +8,6 @@ import CryptoJS from "crypto-js";
 import Filter from "@/lib/db/models/Filter";
 import System from "@/lib/db/models/System";
 
-
 export async function createUser(name, email, phoneNumber,password) {
     try{
         await db.connect();
@@ -340,8 +339,6 @@ export const deleteAdmin = async(id,email)=> {
             await User.findByIdAndDelete(id);
             return{status:200};
         }
-       
-       
     } catch (error) {
         return {status:500,error:error.message}
     }
@@ -349,9 +346,12 @@ export const deleteAdmin = async(id,email)=> {
 
 export const editUserProfile = async(name,phoneNumber,bio,email)=> {
     try {
+        console.log(name,email,phoneNumber,bio);
         await db.connect();
-        const user = await User.findOneAndUpdate({email},{name,phoneNumber:Number(phoneNumber),bio});
-        return{status:200,user};
+        const res = await User.findOneAndUpdate({email},{name,phoneNumber:Number(phoneNumber),bio},{new:true});
+        await db.disconnect();
+        console.log(res);
+        return{status:200,body:res};
     } catch (error) {
         return {status:500,error:error.message}
     }

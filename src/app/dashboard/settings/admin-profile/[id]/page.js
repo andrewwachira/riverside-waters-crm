@@ -4,13 +4,15 @@ import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
 import Image from "next/image";
 import db from '@/lib/db';
 import User from '@/lib/db/models/User';
+import bg1 from "../../../../../../public/images/pattern2.png"
+import avatar from "../../../../../../public/images/avatar.png"
 
 async function AdminProfile({params}) {
   const id = params.id;
   await db.connect();
   const user = await User.findById(id);
   await db.disconnect();
-  
+
   return (
     <DefaultLayout>
         <Breadcrumb pageName={"settings"} additonalRoute={"admin-profile"}/>
@@ -28,8 +30,26 @@ async function AdminProfile({params}) {
               <h3 className="mb-1.5 text-2xl font-semibold text-black dark:text-white">
                { user?.name}
               </h3>
-              <p className="font-medium">{user?.isSuperAdmin ?  "Root admin" : "sub admin"}</p>
-              <p className="font-medium">Admin Since {user?.createdAt.toDateString() }</p>
+              <div className="mx-auto mb-5.5 mt-4.5 grid w-fit grid-cols-3 rounded-md border border-stroke py-2.5 shadow-1 dark:border-strokedark dark:bg-[#37404F]">
+                <div className="flex flex-col items-center justify-center gap-1 border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
+                <span className="text-sm">Role:</span>
+                  <span className="font-semibold text-black dark:text-white">
+                  {user?.isSuperAdmin ?  "Root admin" : "sub admin"}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-1 border-r border-stroke px-4 dark:border-strokedark xsm:flex-row">
+                  <span className="text-sm">Since:</span>
+                  <span className="font-semibold text-black dark:text-white">
+                  {user?.createdAt.toDateString() }
+                  </span>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
+                  <span className="text-sm">Filter Changes:</span>
+                  <span className="font-semibold text-black dark:text-white">
+                    20
+                  </span>
+                </div>
+              </div>
 
               <div className="mx-auto max-w-180">
                 <h4 className="font-semibold text-black dark:text-white">

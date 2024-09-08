@@ -5,11 +5,10 @@ function Warning({message,onRequestClose,setConfirmDelete}) {
     <div className="fixed left-0 top-0 z-999999 flex h-full min-h-screen w-full items-center justify-center bg-black/90 px-4 py-5 block">
     <div className="relative w-full max-w-142.5 rounded-lg bg-warning px-8 py-12 text-center md:px-17.5 md:py-15">
       <span className="mx-auto inline-block">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="78" height="78" color="#000" fill="none">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M10 11L8.5 9.5M8.5 9.5L7 8M8.5 9.5L7 11M8.5 9.5L10 8M17 11L15.5 9.5M15.5 9.5L14 8M15.5 9.5L14 11M15.5 9.5L17 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8 17C8.91212 15.7856 10.3643 15 12 15C13.6357 15 15.0879 15.7856 16 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="000" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+</svg>
+
       </span>
       <h3 className="mt-5.5 pb-2 mb-4 text-xl font-bold text-black sm:text-4xl">Irreversable operation!</h3>
       <p className="mb-7.5 text-black">{message}</p>

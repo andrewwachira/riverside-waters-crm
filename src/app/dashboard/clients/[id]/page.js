@@ -45,7 +45,7 @@ async function Clients({params}) {
             
               <div className=" p-2.5 border-b border-stroke">
                 <h5 className="text-sm font-medium uppercase xsm:text-base">
-                  Contact Person Cell
+                  Contact&apos;s Cell
                 </h5>
               </div>
             </div> 

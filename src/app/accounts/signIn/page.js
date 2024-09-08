@@ -8,8 +8,8 @@ import { login} from "@/actions/server";
 import {useRouter} from "next/navigation";
 import { useSession,signIn} from "next-auth/react";
 import CryptoJS from "crypto-js";
-import { systemDefaults } from "@/actions/server";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 
 export default function SignIn(){
   const {register,handleSubmit,formState:{errors}} = useForm();
@@ -17,20 +17,20 @@ export default function SignIn(){
   const [message,setMessage] = useState(null);
   const [loading,setLoading] = useState(false);
   const [googleLoading,setGoogleLoading] = useState(false);
-  const [systemData,setSystemData] = useState(null);
+  // const [systemData,setSystemData] = useState(null);
   const router = useRouter();
   const {status} = useSession();
-  
+  const getSystemData = async (key)=> {
+      const res = await fetch(key);
+      return res.json();
+    }
+  const {data:systemData,fetchloading,error:err} = useSWR("/api/system/getLoginDefaults",getSystemData);
+
   useEffect(()=>{
     if(status === "authenticated"){
       toast.success("Login successfull",{position:"top-center",duration: 2000,});
       router.push("/dashboard");
     }
-    const getSystemData = async ()=> {
-      const data = await fetch("/api/system/getLoginDefaults");
-      setSystemData(data.system);
-    }
-    getSystemData()
   },[status,router])
 
   const handleSignIn = async ({email,password}) => {
@@ -49,16 +49,16 @@ export default function SignIn(){
     setGoogleLoading(true);
      signIn('google',{redirect:false});
   }
+  console.log(systemData);
   return (
     <main className="flex min-h-screen flex-col justify-between p-8">
       <h1 className={`text-5xl p-3 text-center  text-blue-500 ${Montserra.className}`}>Riverside Water</h1>
-      <div className="rounded-lg border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+      <div className="rounded-lg border border-stroke bg-white shadow-default">
         <div className="flex flex-wrap items-center">
           <div className="hidden w-full xl:block xl:w-1/2">
             <div className="px-26 py-17.5 text-center">
               <Link className="mb-5.5 inline-block" href="/">
-                <Image className="hidden dark:block" src={"/images/riverside-water-logo.png"} alt="Logo" width={176} height={32}/>
-                <Image className="dark:hidden" src={"/images/riverside-water-logo.png"} alt="Logo" width={176} height={32} />
+                <Image src={"/images/riverside-water-logo.png"} alt="Logo" width={176} height={32}/>
               </Link>
               <p className="2xl:px-20 py-3">Client Management System</p>
               <span className="mt-15 inline-block">
@@ -96,7 +96,7 @@ export default function SignIn(){
             </div>
           </div>
 
-          <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
+          <div className="w-full border-stroke xl:w-1/2 xl:border-l-2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
               <h2 className="mb-9 text-2xl font-bold text-black  sm:text-title-xl2">Sign In</h2>
               {message && <div className="w-fit border border-green-600 rounded-md m-auto my-3 bg-green-200 p-3 text-green-800">{message}</div>}
@@ -105,7 +105,7 @@ export default function SignIn(){
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black "> Email </label>
                   <div className="relative">
-                    <input type="email" placeholder="Enter your email" name="email" {...register("email",{required:"Email is required", pattern: {value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-]+$|^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\.[a-zA-Z]{2,})$/i }, message:"Please enter a valid email address"})}className={`w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors.email && "border-rose-600"}`} />
+                    <input type="email" placeholder="Enter your email" name="email" {...register("email",{required:"Email is required", pattern: {value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-]+$|^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\.[a-zA-Z]{2,})$/i }, message:"Please enter a valid email address"})}className={`w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none ${errors.email && "border-rose-600"}`} />
                     <span className="absolute right-4 top-4">
                       <svg className="fill-current" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" >
                         <g opacity="0.5">
@@ -120,7 +120,7 @@ export default function SignIn(){
                 <div className="mb-6">
                   <label className="mb-2.5 block font-medium text-black"> Password </label>
                   <div className="relative">
-                    <input type="password" placeholder="6+ Characters" name="password" {...register("password",{required:"Please enter your password"})} className={`w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors.password && "border-rose-600"} `}/>
+                    <input type="password" placeholder="6+ Characters" name="password" {...register("password",{required:"Please enter your password"})} className={`w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none  ${errors.password && "border-rose-600"} `}/>
                     <span className="absolute right-4 top-4">
                       <svg className="fill-current" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" >
                         <g opacity="0.5">
@@ -138,16 +138,19 @@ export default function SignIn(){
                 </button>
                 
               </form>
-              { !systemData ?
-                <div className="flex h-full items-center justify-center bg-white dark:bg-black">
+              { err ? 
+              <div className="w-full border border-rose-600 rounded-md m-auto mx-4 mb-4 text-center my-3 bg-rose-200 p-3 text-rose-800">{err}</div>
+              :
+              fetchloading ?
+                <div className="flex h-full items-center justify-center bg-white ">
                   <div className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
                   <span className="m-3">Loading...</span>
                 </div>
                 :
-                systemData.googleSignIn && 
+                systemData?.googleSignIn && 
                 <>
                   <div className=' heading-separator mb-4'> Or</div>
-                  <button onClick={handleGoogleSignIn} className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
+                  <button onClick={handleGoogleSignIn} className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 ">
                     <span>
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clipPath="url(#clip0_191_13499)">

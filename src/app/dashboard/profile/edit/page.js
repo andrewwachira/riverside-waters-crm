@@ -6,6 +6,9 @@ import { useForm } from 'react-hook-form';
 import { useEffect,useState } from 'react';
 import { useRouter } from 'next/navigation';
 import avatar from "../../../../../public/images/avatar.png";
+import {UploadDropzone} from "@/lib/utils/uploadthing";
+import { editUserProfile } from '@/actions/server';
+import toast from 'react-hot-toast';
 
 function EditProfile() {
   const {register,handleSubmit,formState:errors, setValue} = useForm();
@@ -19,6 +22,7 @@ function EditProfile() {
       setValue("name",data.name);
       setValue("phoneNumber","0"+data.phoneNumber);
       setValue("email",data.email);
+      setValue("bio",data.bio);
       setEmail(data.email);
       setImage(data.image);
     }
@@ -29,7 +33,10 @@ function EditProfile() {
     const res = await editUserProfile(name,phoneNumber,bio,email);
     if(res.status === 200){
       toast.success("Your info has been updated successfully");
-      router.push("/dashoard/profile");
+      router.push("/dashboard/profile");
+
+    }else{
+      toast.error(res.error);
     }
   }
   return (
@@ -61,7 +68,7 @@ function EditProfile() {
                             </g>
                           </svg>
                         </span>
-                        <input {...register("name",{required:"Name is required"})}className="w-full rounded border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary" type="text" name="fullName" id="fullName" placeholder="Name" />
+                        <input {...register("name",{required:"Name is required"})}className="w-full rounded border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary" type="text" name="name" id="name" placeholder="Name" />
                       </div>
                       {errors.name && (<div className="text-rose-500 ">{errors.name.message}</div>)}
                     </div>
@@ -115,9 +122,6 @@ function EditProfile() {
                   </div>
 
                   <div className="flex justify-end gap-4.5">
-                    <button type='button' className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white" onClick={()=>router.back()} >
-                      Cancel
-                    </button>
                     <button className="flex justify-center rounded bg-primary px-6 py-2 font-medium text-gray hover:bg-opacity-90" type="submit">
                       Save
                     </button>
@@ -152,7 +156,7 @@ function EditProfile() {
                     </div>
                   </div>
 
-                  <div id="FileUpload" className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5">
+                  {/* <div id="FileUpload" className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5">
                     <input type="file" accept="image/*" className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"/>
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <span className="flex h-10 w-10 items-center justify-center rounded-full border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
@@ -169,8 +173,8 @@ function EditProfile() {
                       <p className="mt-1.5">SVG, PNG, JPG or GIF</p>
                       <p>(max, 800 X 800px)</p>
                     </div>
-                  </div>
-
+                  </div> */}
+                  <UploadDropzone/>
                   <div className="flex justify-end gap-4.5">
                     <button className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white" type="submit" >
                       Cancel

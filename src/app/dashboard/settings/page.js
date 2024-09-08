@@ -10,9 +10,10 @@ import { setGoogleSignIn,removeAdminSlot,addAdminSlot } from '@/actions/server';
 import Link from 'next/link';
 import Warning from '@/components/Modals/Warning';
 import Image from 'next/image';
+import useSWR,{useSWRConfig} from 'swr';
 
 function Settings() {
-
+  const { mutate } = useSWRConfig()
   const [theme,setTheme] = useState(() => {
     const initialValue = "light"
     if (typeof window !== 'undefined') {
@@ -21,40 +22,49 @@ function Settings() {
       return localStorageValue !== null ? JSON.parse(localStorageValue) : initialValue;
     }
     return initialValue});
-    const [systemSettings,setSystemSettings] = useState(null);
-    const [accounts,setAccounts] = useState([]);
-    const [loggedUser,setLoggedUser] = useState(null);
+
     const [showOptions,setShowOptions] = useState(false);
     const [optionId,setOptionId] = useState(null);
     const [confirmDelete,setConfirmDelete] = useState(false);
     const [warning,setWarning] = useState(false);
     const [warningMessage,setWarningMessage] = useState(null);
+    const [removeBtnLoading,setRemoveBtnLoading] = useState(false);
+    const [addBtnLoading,setAddBtnLoading] = useState(false);
+    const [loading,setLoading] = useState(false);
+    const getSettings = async (key) => {
+      const res = await fetch(key);
+      return res.json();
+    }
+    const getLoggedUser = async (key) => {
+      setLoading(true);
+      const res = await fetch(key);
+      setLoading(false);
+      return res.json();
+    }
+    const {data:settings,error:sysError} = useSWR("/api/system/getSettings",getSettings);
+    const {data:loggedUser} = useSWR("/api/userInfo",getLoggedUser);
 
     const onRequestClose = () => {
       setWarning(false);
       setWarningMessage("");
     }
-    useEffect(()=>{
-     async function getSettings() {
-        const sysRes = await fetch("/api/system/getSettings");
-        const settings = await sysRes.json();
-        const res = await fetch("/api/userInfo");
-        const data = await res.json();
-        setLoggedUser(data);
-        setSystemSettings(settings.system);
-        setAccounts(settings.users);
-     }
-     getSettings()
-    },[]);
 
     const handleAddAdminSlot = async (e) => {
       e.preventDefault();
-     if(loggedUser.isSuperAdmin){
+     if(!loggedUser.isSuperAdmin){
        toast.error("Only Root admin can add admin slots to the system");
      } else{
+      setAddBtnLoading(true);
       const res = await addAdminSlot();
-      if(res.status == 200) toast.success("Admin Slot removed successfully");
-      else toast.error(res.error);
+      if(res.status == 200) {
+        setAddBtnLoading(false);
+        mutate("/api/system/getSettings");
+        toast.success("Admin Slot added successfully");
+      }
+      else {
+        setAddBtnLoading(false);
+        toast.error(res.error);
+      }
      }
     }
     const handleRemoveAdminSlot = async (e) => {
@@ -62,12 +72,20 @@ function Settings() {
      if(!loggedUser.isSuperAdmin){
        toast.error("Only Root admin can add admin slots to the system");
      }
-     if(accounts.length >= systemSettings.adminAccounts){
+    else if(settings.users.length >= settings.system.adminAccounts){
         toast.error("Delete an admin account first");
      } else{
-        const res = await removeAdminSlot()
-        if(res.status == 200) toast.success("Admin Slot removed successfully");
-        else toast.error(res.error);
+        setRemoveBtnLoading(true);
+        const res = await removeAdminSlot();
+        if(res.status == 200){
+          setRemoveBtnLoading(false);
+          toast.success("Admin Slot removed successfully");
+          mutate("/api/system/getSettings");
+        } 
+        else{
+          setRemoveBtnLoading(false);
+          toast.error(res.error);  
+        } 
      }
     }
 
@@ -83,18 +101,21 @@ function Settings() {
     const handleDeleteAdmin = async (id,name) => {
       if(!loggedUser.isSuperAdmin){
         toast.error("Only Root admin can add admin slots to the system");
-      }
-      setWarning(true);
-      setWarningMessage(`Are you sure you want to permanently delete ${name} from the system?`);
-      if(confirmDelete){
-        onRequestClose();
-        const res = await deleteAdmin(id,loggedUser.email);
-        if(res.status === 200){
-        toast.success("Google Signin Changed");
-        }else{
-          toast.error(res.error);
+      }else{
+        setWarning(true);
+        setWarningMessage(`Are you sure you want to permanently delete ${name} from the system?`);
+        if(confirmDelete){
+          onRequestClose();
+          const res = await deleteAdmin(id,loggedUser.email);
+          if(res.status === 200){
+            mutate("/api/system/getSettings");
+            toast.success("Google Signin Changed");
+          }else{
+            toast.error(res.error);
+          }
         }
       }
+      
     }
   return (
     <DefaultLayout>
@@ -105,13 +126,13 @@ function Settings() {
           <h1 className='text-2xl mb-2 text-bold'>Accounts</h1>
           <div className='p-3'> 
           <div className="w-full flex mb-4 rounded-md border border-stroke py-2.5 dark:border-strokedark">
-          { accounts.length < 1 ? 
+          { loading ? 
             <div className="flex h-full items-center justify-center bg-white dark:bg-black">
               <div className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
               <span className="m-3">Loading...</span>
             </div>
           : 
-          accounts.map(account => (
+          settings?.users?.length >0 && settings?.users.map(account => (
             <div className="flex flex-col" key={account._id}>
               <div className="flex items-center justify-between p-4.5 hover:bg-[#F9FAFB] dark:hover:bg-meta-4">
                 <div className="flex items-center">
@@ -144,18 +165,18 @@ function Settings() {
           </div>
 
             <div className='flex items-center'> 
-              <p className='my-3'>Maximus Admins allowed in the System :</p>
-              <span className='ml-2'>{systemSettings?.adminAccounts ? systemSettings?.adminAccounts : "Loading data..." }</span>
+              <p className='my-3'>Maximum Admins allowed in the System :</p>
+              <span className='ml-2'>{loading ? "loading data..." : sysError ? "Error fetching data" : settings?.system?.adminAccounts  }</span>
             </div>
-            <button  onClick={(e)=>handleAddAdminSlot(e)} className='w-fit justify-center rounded bg-primary p-3 my-7 font-medium text-gray hover:bg-opacity-90'> Add Admin Slot</button>
-            <button  onClick={(e)=>handleRemoveAdminSlot(e)} className='ml-3 w-fit justify-center rounded bg-danger p-3 my-7 font-medium text-gray hover:bg-opacity-90'> Remove Admin Slot</button>
+            <button  onClick={(e)=>handleAddAdminSlot(e)} className='w-fit justify-center rounded bg-primary p-3 my-7 font-medium text-gray hover:bg-opacity-90'> {addBtnLoading ? <div className='flex items-center'><div className="h-5 w-5 animate-spin rounded-full border-4 border-solid border-orange-500 border-t-transparent"></div> <span className='ml-2'>running operation...</span></div> : "Add Admin Slot"}</button>
+            <button  onClick={(e)=>handleRemoveAdminSlot(e)} className='ml-3 w-fit justify-center rounded bg-danger p-3 my-7 font-medium text-gray hover:bg-opacity-90'> {removeBtnLoading ? <div className='flex items-center'><div className="h-5 w-5 animate-spin rounded-full border-4 border-solid border-orange-500 border-t-transparent"></div> <span className='ml-2'>running operation...</span></div>  : "Remove Admin Slot"}</button>
           </div>
         </div>
         <div className="rounded-md border border-stroke bg-white px-5 pb-2.5 mb-7 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
           <h1  className='text-2xl mb-2 text-bold'>Security</h1>
           <div className='flex items-center p-3'>
             <p className='m-3'>Enable Google Sign in</p>
-            <SwitcherThree defaultChoice={systemSettings?.googleSignIn} enableGoogleSignin={enableGoogleSignin} ></SwitcherThree>
+            <SwitcherThree defaultChoice={settings?.googleSignIn} enableGoogleSignin={enableGoogleSignin} ></SwitcherThree>
           </div>
         </div>
         <div className="rounded-md border border-stroke bg-white px-5 pb-2.5 mb-7 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
