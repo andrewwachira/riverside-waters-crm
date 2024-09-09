@@ -41,7 +41,7 @@ function Settings() {
       setLoading(false);
       return res.json();
     }
-    const {data:settings,error:sysError} = useSWR("/api/system/getSettings",getSettings);
+    const {data:settings,error:sysError} = useSWR("/api/system/getSettings",getSettings,{revalidateOnFocus:false});
     const {data:loggedUser} = useSWR("/api/userInfo",getLoggedUser);
 
     const onRequestClose = () => {

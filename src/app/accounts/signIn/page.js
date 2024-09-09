@@ -17,15 +17,15 @@ export default function SignIn(){
   const [message,setMessage] = useState(null);
   const [loading,setLoading] = useState(false);
   const [googleLoading,setGoogleLoading] = useState(false);
-  // const [systemData,setSystemData] = useState(null);
   const router = useRouter();
   const {status} = useSession();
   const getSystemData = async (key)=> {
+    setGoogleLoading(true);
       const res = await fetch(key);
+      if(res)setGoogleLoading(false);
       return res.json();
     }
-  const {data:systemData,fetchloading,error:err} = useSWR("/api/system/getLoginDefaults",getSystemData);
-
+  const {data:systemData,error:err} = useSWR("/api/system/getLoginDefaults",getSystemData,{revalidateOnFocus: false,refreshInterval:60000});
   useEffect(()=>{
     if(status === "authenticated"){
       toast.success("Login successfull",{position:"top-center",duration: 2000,});
@@ -49,7 +49,7 @@ export default function SignIn(){
     setGoogleLoading(true);
      signIn('google',{redirect:false});
   }
-  console.log(systemData);
+
   return (
     <main className="flex min-h-screen flex-col justify-between p-8">
       <h1 className={`text-5xl p-3 text-center  text-blue-500 ${Montserra.className}`}>Riverside Water</h1>
@@ -141,13 +141,13 @@ export default function SignIn(){
               { err ? 
               <div className="w-full border border-rose-600 rounded-md m-auto mx-4 mb-4 text-center my-3 bg-rose-200 p-3 text-rose-800">{err}</div>
               :
-              fetchloading ?
+              googleLoading ?
                 <div className="flex h-full items-center justify-center bg-white ">
                   <div className="h-16 my-3 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
                   <span className="m-3">Loading...</span>
                 </div>
                 :
-                systemData?.googleSignIn && 
+                systemData?.system?.googleSignIn && 
                 <>
                   <div className=' heading-separator mb-4'> Or</div>
                   <button onClick={handleGoogleSignIn} className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 ">
@@ -165,7 +165,7 @@ export default function SignIn(){
                           </clipPath>
                         </defs>
                       </svg>
-                    </span>{googleLoading ? "Loading..." : 'Sign in with Google'}
+                    </span>{loading ? "Loading..." : 'Sign in with Google'}
                   </button>
                 </>}
                 <div className=" flex justify-between gap-2 mt-6 text-center">

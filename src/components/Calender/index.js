@@ -2,9 +2,10 @@
 import Breadcrumb from "../Breadcrumbs/Breadcrumb";
 import {useState,useEffect} from "react";
 import Link from "next/link";
-import { getScheduleData } from "@/actions/server";
+// import { getScheduleData } from "@/actions/server";
 import { getDateDiff } from "@/lib/utils";
 import useColorMode from "@/hooks/useColorMode";
+import useSWR from "swr";
 
 const Calendar = () => {
   const [colorMode, setColorMode] = useColorMode();
@@ -13,7 +14,7 @@ const Calendar = () => {
   const monthsArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const currentYear = new Date().getFullYear();
-  const currentDay = new Date().getDay();
+  // const currentDay = new Date().getDay();
   const currentDate = new Date().getDate();
   const currentMonth = new Date().getMonth();
   const [schedulerData,setSchedulerData] = useState([]);
@@ -21,39 +22,42 @@ const Calendar = () => {
   const [loading,setLoading] = useState(false);
   const [weeks,setWeeks] = useState(generateCalendar());
   
-  useEffect(()=>{
-      async function getData(){
-        setLoading(true);
-       const res =  await  getScheduleData();
-        if(res.status === 200){
-          let clients,filters;
-          const {payload} = res;
-          clients = payload.clients;
-          filters = payload.filters;
-          for (let client of clients) {
-            for(let filter of filters){
-              let filterEventArr = [
-                  {date:filter.u3_ChangeDate,name:"Ultra 3 filters"},
-                  {date:filter.ro_ChangeDate,name:"Reverse Osmosis"},
-                  {date:filter.pc_ChangeDate,name:"Post Carbon"},
-                  {date:filter.rc_ChangeDate,name:"Remineralizing Cartilage"}
-              ];
-              let filterEventArr2 = [filter.u3_ChangeDate,filter.ro_ChangeDate,filter.pc_ChangeDate,filter.rc_ChangeDate];
-              filter.filterEvents = filterEventArr.sort((a,b)=> new Date(a.date)- new Date(b.date));
-              filter.filterEventsArr = filterEventArr2.sort((a,b)=> new Date(a)- new Date(b));
-              filter.soonestDate = filterEventArr[0].date;
-              if(client._id == filter.clientId){
-                client.filterInfo = filter;
-              }
-            } 
+
+  async function getData(key){
+    setLoading(true);
+   const res =  await fetch(key);
+   const data = await res.json();
+    if(res.status === 200){
+      let clients,filters;
+      const {payload} = data;
+      clients = payload.clients;
+      filters = payload.filters;
+      for (let client of clients) {
+        for(let filter of filters){
+          let filterEventArr = [
+              {date:filter.u3_ChangeDate,name:"Ultra 3 filters"},
+              {date:filter.ro_ChangeDate,name:"Reverse Osmosis"},
+              {date:filter.pc_ChangeDate,name:"Post Carbon"},
+              {date:filter.rc_ChangeDate,name:"Remineralizing Cartilage"}
+          ];
+          let filterEventArr2 = [filter.u3_ChangeDate,filter.ro_ChangeDate,filter.pc_ChangeDate,filter.rc_ChangeDate];
+          filter.filterEvents = filterEventArr.sort((a,b)=> new Date(a.date)- new Date(b.date));
+          filter.filterEventsArr = filterEventArr2.sort((a,b)=> new Date(a)- new Date(b));
+          filter.soonestDate = filterEventArr[0].date;
+          if(client._id == filter.clientId){
+            client.filterInfo = filter;
           }
-          setSchedulerData(clients);
-          setLoading(false);
-        }else{
-          setScheduleDataErr(res.error);
-        }
-      } 
-      getData();
+        } 
+      }
+      setSchedulerData(clients);
+      setLoading(false);
+    }else{
+      setScheduleDataErr(res.error);
+    }
+  } 
+  const {data} = useSWR("/api/scheduler",getData)
+
+  useEffect(()=>{
   },[currentDate])
   
   function isLeapYear(year) {
