@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { createClientForm1,getClients, saveFilterInfo } from '@/actions/server';
 import useColorMode from '@/hooks/useColorMode';
 import { UploadButton } from '@/lib/utils/uploadthing';
+// import toast from 'react-hot-toast';
 
 function Forms() {
     const [colorMode, setColorMode] = useColorMode();
@@ -25,6 +26,10 @@ function Forms() {
     const [pc,setPc] = useState(false);
     const [rc,setRc] = useState(false);
     const [adminComments,setAdminComments]  = useState("");
+    const [fTFile,setFTFile] = useState(null);
+    const [testFiles,setTestFiles] = useState([]);
+    const [testNames,setTestNames] = useState([]);
+    const [testResults,setTestResults] = useState([]);
     
     useEffect( ()=>{
         const fetchClients = async () => {
@@ -41,24 +46,22 @@ function Forms() {
             component: (
                 <div className="mb-6 flex flex-col gap-6 xl:flex-row items-center justify-center" key={nextId}>
                     <div className="w-full xl:w-1/2">
-                        <label name={`testName${nextId}`} re className="mb-3 block text-sm font-medium text-black dark:text-white">Test Name</label>
-                        <input placeholder="Enter Test Name" className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                        <label name={`testName${nextId}`}  className="mb-3 block text-sm font-medium text-black dark:text-white">Test Name</label>
+                        <input placeholder="Enter Test Name" onChange={(e)=>setTestNames(...testNames,{testName:e.target.value, testNameId:nextId})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                     </div>
                     <div className="w-full xl:w-1/2">
-                        <label name={`testResult${nextId}`}className="mb-3 block text-sm font-medium text-black dark:text-white">Test Result</label>
-                        <input placeholder="Enter Test Result" className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                        <label name={`testResult${nextId}`} className="mb-3 block text-sm font-medium text-black dark:text-white">Test Result</label>
+                        <input placeholder="Enter Test Result" onChange={(e)=>setTestResults(...testResults,{testResult:e.target.value, testResultId:nextId})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                     </div>
                     <div className="w-full xl:w-1/2">
                         <label name={`testFile${nextId}`} className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Test Result</label>
                         <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 " endpoint="imageUploader" onClientUploadComplete={(res) => {
-                        // Do something with the response
-                        console.log("Files: ", res);
+                        setTestFiles(...testFiles,{testFileUrl:res,testFileId:nextId});
                         alert("Upload Completed");
                         }}
-                            onUploadError={(error) => {
-                            // Do something with the error.
-                            alert(`ERROR! ${error.message}`);
-                            }}
+                        onUploadError={(error) => {
+                        alert(`ERROR! ${error.message}`);
+                        }}
                         />
                     </div>
                     
@@ -78,8 +81,13 @@ function Forms() {
     }
    
     const handleClientRegistration = async({firstName,lastName,phoneNumber,residence,contactName,contactCell}) => {
-        const saveClient = await createClientForm1(firstName,lastName,phoneNumber,residence,contactName,contactCell)
-        // pop a notification telling the user that a client was registered
+        const saveClient = await createClientForm1(firstName,lastName,phoneNumber,residence,contactName,contactCell);
+
+        if (saveClient.status === 201) {
+            toast.success("Client created successfully");
+        }else{
+            toast.error("An error occurred");
+        }
     }
     const handleFilterInfo = async(e) => {
         e.preventDefault()
@@ -130,6 +138,9 @@ function Forms() {
         if(filterName == "ro") setRo(false);
         if(filterName == "pc") setPc(false);
         if(filterName == "rc") setRc(false);
+    }
+    const handleTestForm = async({rawFT,treatedFT,testClient,})=> {
+        console.log(testNames,testFiles,testResults);
     }
   return (
     <div className="">
@@ -183,6 +194,7 @@ function Forms() {
                 </form>
             </div>
         </div>
+    {/* Filter form */}
         <div className="flex m-5 flex-col gap-9">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div onClick={()=>setFilterFormOpen(!filterFormOpen)} className="border-b border-stroke px-6.5 py-4 bg-blue-800 rounded-md dark:border-strokedark flex justify-between">
@@ -247,6 +259,7 @@ function Forms() {
                 </form>
             </div>
         </div>
+    {/* Test Form */}
         <div className="flex m-5 flex-col gap-9">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div onClick={()=>setTestFormOpen(!testFormOpen)} className="border-b border-stroke bg-blue-700 rounded-md text- px-6.5 py-4 dark:border-strokedark flex justify-between">
@@ -258,11 +271,11 @@ function Forms() {
                         </svg>
                     </div>
                 </div>
-                <form action="#" id="test-results-form" className={testFormOpen ? "block" : "hidden"}>
+                <form onSubmit={handleSubmit3(handleTestForm)}  id="test-results-form" className={testFormOpen ? "block" : "hidden"}>
                     <div className=" p-6.5">
                             <label className="mb-2.5 block text-black dark:text-white"> Client </label>
                             <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                <select className="relative z-20  w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ">
+                                <select {...register3("testClient",{required:"this field is required"})}className="relative z-20  w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ">
                                 <option value="" disabled="" className="text-body dark:text-bodydark">Select Client</option>
                                     {
                                         clients?.map(client => (
@@ -278,33 +291,37 @@ function Forms() {
                                     </svg>
                                 </span>
                             </div>
+                            {errors3?.testClient && <div className='text-rose-500'>{errors3?.testClient?.message}</div>}
                     </div>
                     
                     <div className="p-6.5">
                         <div className="mb-6 flex flex-col gap-6 xl:flex-row">
                             <div className="mb-4.5 w-full xl:w-1/2">
-                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">Floride Test Results</label>
-                                <input placeholder="Enter Floride test results" className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white"> Raw Floride Test</label>
+                                <input placeholder="Enter Raw Floride results" {...register3("rawFT",{required:"This field is required"})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                                {errors3?.rawFT && <div className='text-rose-500'>{errors3?.rawFT?.message}</div>}
+                            </div>
+                            <div className="mb-4.5 w-full xl:w-1/2">
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">Treated Floride Test </label>
+                                <input placeholder="Enter Treated Floride results" {...register3("treatedFT",{required:"This field is required"})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                                {errors3?.treatedFT && <div className='text-rose-500'>{errors3?.treatedFT?.message}</div>}
                             </div>
                             <div className="mb-4.5 w-full xl:w-1/2">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Floride Test Results</label>
-                                <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 " endpoint="imageUploader" 
-                                onClientUploadComplete={(res) => {console.log(res);alert("Upload Completed");
+                                <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 dark:border-form-strokedark" endpoint="imageUploader" 
+                                onClientUploadComplete={(res) => {setFTFile(res);alert("Upload Completed");
                                     }} onUploadError={(error) => {
-                                    // Do something with the error.
                                     alert(`ERROR! ${error.message}`);
                                     }}
                                 />                            
                             </div>
                         </div>
-                        <div className=' heading-separator'> Other Tests</div>
+                        <div className='heading-separator'> Other Tests</div>
                         <div id="testInputParent">
                             {inputRows.map(row=> row.component)}
                         </div>
-                        
-                    
-                        <button id="addInputButton" type='button' onClick={()=>addRow()} className="flex w-full justify-center rounded bg-white transition ease-in-out duration-500 text-orange-700 border border-orange-600 p-3 my-7 font-medium text-gray hover:bg-opacity-90  hover:bg-orange-600 hover:text-white">Add Test Field</button>
-                        <button className="flex w-full justify-center rounded bg-primary p-3 my-7 font-medium text-gray hover:bg-opacity-90">Save Test Records</button>
+                        <button id="addInputButton" type='button' onClick={()=>addRow()} className="flex w-full justify-center rounded bg-orange-200 transition ease-in-out duration-500 text-orange-700 border border-orange-600 p-3 my-7 font-medium text-gray hover:bg-opacity-90  hover:bg-orange-600 hover:text-white">Add Test Field</button>
+                        <button type='submit'  className="flex w-full justify-center rounded bg-primary p-3 my-7 font-medium text-gray hover:bg-opacity-90">Save Test Records</button>
                 </div>
             </form>
         </div>

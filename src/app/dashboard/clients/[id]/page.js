@@ -59,7 +59,7 @@ async function Clients({params}) {
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                <p className="text-black">{client.residence}</p>
+                <p className="text-black dark:text-white">{client.residence}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">

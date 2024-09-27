@@ -160,7 +160,7 @@ const Calendar = () => {
               weeks.length > 1 ? weeks.map((week, index) => (
                 <tr className="grid grid-cols-7" key={index}>
                     {week.map((day, i) => {
-                      const events = schedulerData.filter(client => client.filterInfo.filterEvents.some(event =>   new Date(event.date).getDate() === day && new Date(event.date).getMonth() === month && new Date(event.date).getFullYear() === year));
+                      const events = schedulerData.filter(client => client?.filterInfo?.filterEvents.some(event =>   new Date(event.date).getDate() === day && new Date(event.date).getMonth() === month && new Date(event.date).getFullYear() === year));
 
                       return(
                         <td className={ `ease relative h-20 cursor-pointer border border-stroke p-2 transition duration-500 hover:bg-gray dark:border-strokedark dark:hover:bg-meta-4 md:h-25 md:p-6 xl:h-31 ${day === currentDate && month === currentMonth && year === currentYear && 'bg-orange-500'}`} key={i}>
