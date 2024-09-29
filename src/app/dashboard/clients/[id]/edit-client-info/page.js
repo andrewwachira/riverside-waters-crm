@@ -22,7 +22,8 @@ function EditClientInfo({params}) {
   useEffect(()=>{
     const getData = async()=>{
       setLoading(true);
-      const res = await getClientData(params.id);
+      let res = await fetch(`/api/clients/${params.id}/clientInfo`);
+      res = await res.json();
       if(res.status == 200){
         setValue("firstName",res.client.firstName);
         setValue("lastName",res.client.lastName);
@@ -122,6 +123,7 @@ function EditClientInfo({params}) {
               }
             </form>
         </div>
+        <div className='h-[50vh]'></div>
     </DefaultLayout>
   )
 }

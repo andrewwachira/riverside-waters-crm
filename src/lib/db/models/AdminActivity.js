@@ -3,12 +3,13 @@ import mongoose from "mongoose";
 const adminActivitySchema = new mongoose.Schema(
     {
         name:{type:String, required:true},
-        activity : [{
+        activity : {
             admin: {type:String},
             adminId: {type:mongoose.Schema.Types.ObjectId,ref:"User",required:true},
             action: {type:String},
             
-        }]
+        },
+        date:{type:Date,required:true}
     },
     {
         timestamps:true

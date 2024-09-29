@@ -6,7 +6,7 @@ import { getFilterData,editFilterData } from '@/actions/server';
 import Error from '@/components/Modals/Error';
 import Success from '@/components/Modals/Success';
 import { useRouter } from 'next/navigation';
-import DatePicker from '@/components/FormElements/DatePicker/DatePicker'
+import DatePicker from '@/components/FormElements/DatePicker/DatePicker';
 
 function EditFilterInfo({params}) {
   const [loading,setLoading] = useState(false);
@@ -30,23 +30,24 @@ function EditFilterInfo({params}) {
   const [sedimentFilter,setSedimentFilter] = useState(false);
   const [filterDates,setFilterDates] = useState([]);
   const [submitLoading,setSubmitLoading] = useState(false);
-  console.log(filterDates);
+
   useEffect(()=>{
     const getData = async()=>{
       setLoading(true);
-      const res = await getFilterData(params.id);
-      setRes(res);
-      if(res.status === 200 && res.filter !== null){
-        setSedimentFilter(res.filter.sedimentFilter)
-        setU3Val(res.filter.u3_ChangeDate);
-        setRoVal(res.filter.ro_ChangeDate);
-        setPcVal(res.filter.pc_ChangeDate);
-        setRcVal(res.filter.rc_ChangeDate);
-        const prevU3 = {filterName:"u3",date:res.filter.u3_ChangeDate}
-        const prevRo = {filterName:"ro",date:res.filter.ro_ChangeDate}
-        const prevPc = {filterName:"pc",date:res.filter.pc_ChangeDate}
-        const prevRc = {filterName:"rc",date:res.filter.rc_ChangeDate}
-        setFilterDates([prevU3,prevRo,prevPc,prevRc])
+      const res = await fetch(`/api/clients/${params.id}/filterInfo`);
+      const data = await res.json();
+      if(res.status === 200) setRes(res); setLoading(false);
+      if(res.status === 200 && data.filter !== null){
+        setSedimentFilter(data.filter.sedimentFilter)
+        setU3Val(data.filter.u3_ChangeDate);
+        setRoVal(data.filter.ro_ChangeDate);
+        setPcVal(data.filter.pc_ChangeDate);
+        setRcVal(data.filter.rc_ChangeDate);
+        const prevU3 = {filterName:"u3",date:data.filter.u3_ChangeDate};
+        const prevRo = {filterName:"ro",date:data.filter.ro_ChangeDate};
+        const prevPc = {filterName:"pc",date:data.filter.pc_ChangeDate};
+        const prevRc = {filterName:"rc",date:data.filter.rc_ChangeDate};
+        setFilterDates([prevU3,prevRo,prevPc,prevRc]);
       }else{
         setFetchError(res.error);
       }
@@ -58,10 +59,10 @@ function EditFilterInfo({params}) {
 
    const getDate= (date,inputName) => {
         const item =filterDates.find(item => item.filterName === inputName).date=date;
-    }
+  }
+  
   const handleEditFilter = async(e) => {
     e.preventDefault();
-    console.log(filterDates);
     if(filterDates.length !== 4){
       const unfilled = []
       const obj = {
@@ -125,7 +126,7 @@ function EditFilterInfo({params}) {
 
   return (
     <DefaultLayout>
-        <Breadcrumb pageName="clients" additonalRoute="edit-client-info" />
+        <Breadcrumb pageName="clients" additonalRoute="edit-filter-info" />
         {updateError && <Error onRequestClose={onErrRequestClose} message={error}/>}
         {updateSuccess && <Success onRequestClose={onSuccRequestClose} message={successMessage}/>}
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -177,6 +178,7 @@ function EditFilterInfo({params}) {
               }
             </form>
         </div>
+        <div className='h-[50vh]'></div>
     </DefaultLayout>
   )
 }

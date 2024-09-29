@@ -5,11 +5,11 @@ import { useForm } from 'react-hook-form';
 import { createClientForm1,getClients, saveFilterInfo } from '@/actions/server';
 import useColorMode from '@/hooks/useColorMode';
 import { UploadButton } from '@/lib/utils/uploadthing';
-// import toast from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 function Forms() {
     const [colorMode, setColorMode] = useColorMode();
-    const {register,handleSubmit,formState:{errors}} = useForm();
+    const {register,handleSubmit,formState:{errors},reset} = useForm();
     const {register:register3,handleSubmit:handleSubmit3,formState:{errors:errors3}} = useForm();
     const [clientFormOpen,setClientFormOpen] = useState(false); 
     const [filterFormOpen,setFilterFormOpen] = useState(false); 
@@ -30,6 +30,7 @@ function Forms() {
     const [testFiles,setTestFiles] = useState([]);
     const [testNames,setTestNames] = useState([]);
     const [testResults,setTestResults] = useState([]);
+    const [trigger,setTrigger] = useState(false);
     
     useEffect( ()=>{
         const fetchClients = async () => {
@@ -38,7 +39,7 @@ function Forms() {
         }
      fetchClients()
      
-    },[colorMode])
+    },[colorMode,trigger])
 
     const addRow = () =>{
         const newRow = {
@@ -82,11 +83,13 @@ function Forms() {
    
     const handleClientRegistration = async({firstName,lastName,phoneNumber,residence,contactName,contactCell}) => {
         const saveClient = await createClientForm1(firstName,lastName,phoneNumber,residence,contactName,contactCell);
-
         if (saveClient.status === 201) {
             toast.success("Client created successfully");
+            setTrigger(true);
+            reset();
+            setClientFormOpen(false);
         }else{
-            toast.error("An error occurred");
+            toast.error(saveClient.error)
         }
     }
     const handleFilterInfo = async(e) => {
@@ -181,12 +184,12 @@ function Forms() {
                         </div>
                         <div className="mb-4.5">
                             <label className="mb-3 block text-sm font-medium text-black dark:text-white">Contact Person Name</label>
-                            <input name="contactName" {...register("contactName",{required:"Contact Person Name is required"})}  placeholder="Enter Client's contact person" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactName && "border-danger"}`} type="text"/>
+                            <input name="contactName" {...register("contactName",)}  placeholder="Enter Client's contact person" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactName && "border-danger"}`} type="text"/>
                             {errors.contactName && <div className='text-rose-500'>{errors?.contactName?.message}</div>}
                         </div>
                         <div className="mb-4.5">
                             <label className="mb-3 block text-sm font-medium text-black dark:text-white">Contact Person Phone Number</label>
-                            <input name="contactCell" {...register("contactCell",{required:{value: /^\d{10,10}$/,message:"Enter phone Number as per the format"}})}  placeholder="0720-123-123" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactCell && "border-danger"}`} type="tel"/>
+                            <input name="contactCell" {...register("contactCell")}  placeholder="0720-123-123" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactCell && "border-danger"}`} type="tel"/>
                             {errors.contactCell && <div className='text-rose-500'>{errors?.contactCell?.message}</div>}
                         </div>
                         <button type='submit' className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">Save Client</button>

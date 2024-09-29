@@ -15,7 +15,7 @@ async function Clients({params}) {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Clients" additonalRoute={client.firstName}/>
+      <Breadcrumb pageName="clients" additonalRoute={client.firstName}/>
       <h1 className="text-center text-5xl my-5 ">{client.firstName + " " + client.lastName}</h1>
       <div className="">
         <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 mb-7 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
@@ -131,6 +131,7 @@ async function Clients({params}) {
             </div>
         </div >
     </div>
+    <div className='h-[50vh]'></div>
     </DefaultLayout>
   )
 }
