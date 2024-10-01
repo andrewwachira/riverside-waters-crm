@@ -73,7 +73,7 @@ const DashboardUI = () => {
                 <p className="mb-3">There are no upcoming filter events</p>
               :
             <div className="flex flex-col">
-              <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
+              <div className="grid grid-cols-2 rounded-sm bg-gray-2 dark:bg-meta-4 md:grid-cols-4">
                 <div className="p-2.5 xl:p-5">
                   <h5 className="text-sm font-medium uppercase xsm:text-base">
                     Client
@@ -84,12 +84,12 @@ const DashboardUI = () => {
                     Residence
                   </h5>
                 </div>
-                <div className="p-2.5 text-center xl:p-5">
+                <div className=" hidden p-2.5 text-center md:block xl:p-5">
                   <h5 className="text-sm font-medium uppercase xsm:text-base">
                     Filters
                   </h5>
                 </div>
-                <div className="p-2.5 text-center xl:p-5">
+                <div className=" hidden p-2.5 text-center md:block xl:p-5">
                   <h5 className="text-sm font-medium uppercase xsm:text-base">
                    Date
                   </h5>
@@ -99,7 +99,7 @@ const DashboardUI = () => {
               {
               dashData?.upcomingFilters.map((filter, key) => (
                 <div
-                  className={`grid grid-cols-3 sm:grid-cols-4 ${
+                  className={`grid grid-cols-2 md:grid-cols-4 ${
                     key === dashData?.upcomingFilters?.length - 1
                       ? ""
                       : "border-b border-stroke dark:border-strokedark"
@@ -107,26 +107,26 @@ const DashboardUI = () => {
                   key={key}
                 >
                   <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                    <p className="hidden text-black dark:text-white sm:block">
-                      {filter.clientId.firstName + " " + filter.clientId.lastName}
-                    </p>
+                    <Link href={`/dashboard/clients/${filter?.clientId._id}`} className="text-black dark:text-white md:block">
+                      {filter?.clientId.firstName + " " + filter?.clientId.lastName}
+                    </Link>
                   </div>
 
                   <div className="flex items-center justify-center p-2.5 xl:p-5">
-                    <p className="text-black dark:text-white">{filter.clientId.residence}</p>
+                    <p className="text-black dark:text-white">{filter?.clientId.residence}</p>
                   </div>
 
-                  <div className="flex flex-col items-center justify-center p-2.5 xl:p-5 ">
+                  <div className="hidden flex flex-col items-center justify-center p-2.5 xl:p-5 md:block">
                     {filter?.futureDates?.length > 0 && filter?.futureDates.map( date =>(
-                     <div key={date.key} className="text-black">
+                     <div key={date.key} >
                         <p className="my-1 mx-auto ">{date.key}</p>
                      </div>
                     ))}
                   </div>
 
-                  <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
+                  <div className="hidden flex flex-col items-center justify-center p-2.5 xl:p-5 md:block">
                     {filter?.futureDates?.length > 0 && filter?.futureDates.map( date =>(
-                     <div key={date.key} className="text-black">
+                     <div key={date.key} >
                         <p className="my-1 mx-auto">{new Date(date.value).toDateString()}</p>
                      </div>
                     ))}
@@ -147,7 +147,7 @@ const DashboardUI = () => {
                 <p className="mb-3">There are no filter change events due</p>
               :
             <div className="flex flex-col">
-              <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 sm:grid-cols-4">
+              <div className="grid grid-cols-2 rounded-sm bg-gray-2 dark:bg-meta-4 md:grid-cols-4">
                 <div className="p-2.5 xl:p-5">
                   <h5 className="text-sm font-medium uppercase xsm:text-base">
                     Client
@@ -158,12 +158,12 @@ const DashboardUI = () => {
                     Residence
                   </h5>
                 </div>
-                <div className="p-2.5 text-center xl:p-5">
+                <div className="hidden p-2.5 text-center md:block xl:p-5">
                   <h5 className="text-sm font-medium uppercase xsm:text-base">
                     Filters
                   </h5>
                 </div>
-                <div className="p-2.5 text-center xl:p-5">
+                <div className="hidden p-2.5 text-center md:block xl:p-5">
                   <h5 className="text-sm font-medium uppercase xsm:text-base">
                     Dates
                   </h5>
@@ -173,7 +173,7 @@ const DashboardUI = () => {
               {
               dashData?.filtersDue.map((filter, key) => (
                 <div
-                  className={`grid grid-cols-3 sm:grid-cols-4 ${
+                  className={`grid grid-cols-2 md:grid-cols-4 ${
                     key === dashData?.filtersDue?.length - 1
                       ? ""
                       : "border-b border-stroke dark:border-strokedark"
@@ -181,26 +181,26 @@ const DashboardUI = () => {
                   key={key}
                 >
                   <div className="flex items-center gap-3 p-2.5 xl:p-5">
-                    <p className="hidden text-black dark:text-white sm:block">
+                    <Link href={`/dashboard/clients/${filter?.clientId._id}`} className="text-black dark:text-white">
                       {filter?.clientId.firstName + " " + filter?.clientId.lastName}
-                    </p>
+                    </Link>
                   </div>
 
                   <div className="flex items-center justify-center p-2.5 xl:p-5">
                     <p className="text-black dark:text-white">{filter?.clientId.residence}</p>
                   </div>
 
-                  <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
+                  <div className="hidden md:block flex flex-col items-center justify-center p-2.5 xl:p-5">
                     {filter?.pastDates?.length > 0 && filter?.pastDates.map( date =>(
-                     <div key={date.key} className="text-black">
+                     <div key={date.key} >
                         <p className="my-1">{date.key}</p>
                      </div>
                     ))}
                   </div>
 
-                  <div className="flex flex-col items-center justify-center p-2.5 xl:p-5">
+                  <div className="hidden md:block flex flex-col items-center justify-center p-2.5 xl:p-5">
                     {filter?.pastDates?.length > 0 && filter?.pastDates.map( date =>(
-                     <div key={date.key} className="text-black">
+                     <div key={date.key}>
                       <p className="my-1">{new Date(date.value).toDateString()}</p>
                      </div>
                     ))}
@@ -220,20 +220,17 @@ const DashboardUI = () => {
           <div>
             {dashData?.admins?.map((admin, key) => (
               <Link
-                href="#"
+                href={`/dashboard/settings/admin-profile/${admin._id}`}
                 className="flex items-center gap-5 px-7.5 py-3 hover:bg-gray-3 dark:hover:bg-meta-4"
                 key={key}
               >
                 <div className="relative h-14 w-14 rounded-full">
                   <Image
-                    width={56}
-                    height={56}
+                    width={120}
+                    height={120}
                     src={admin.image ? admin.image : avatar.src}
                     alt="User"
-                    style={{
-                      width: "auto",
-                      height: "auto",
-                    }}
+                    style={{ width: "auto",clipPath:"circle()", height: "auto"}}
                   />
                 </div>
 

@@ -12,7 +12,7 @@ import User from '@/lib/db/models/User';
 async function Profile() {
   const session = await auth();
   await db.connect();
-  const me = await User.findOne({email:session.user.email});
+  const me = await User.findOne({email:session?.user?.email});
  
   return (
     <DefaultLayout>

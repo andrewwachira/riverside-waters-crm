@@ -23,7 +23,7 @@ async function AdminProfile({params}) {
           <div className="px-4 pb-6 text-center lg:pb-8 xl:pb-11.5">
             <div className="relative z-30 mx-auto  w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
               <div className="relative drop-shadow-2">
-                <Image src={`${user?.image ? user?.image : avatar.src }`} width={250} height={250} style={{  clipPath:"circle()", height: "auto",}} alt="profile"/>
+                <Image src={`${user?.image ? user?.image : avatar.src }`} width={500} height={500} style={{  clipPath:"circle()"}} alt="profile"/>
               </div>
             </div>
             <div className="mt-4">

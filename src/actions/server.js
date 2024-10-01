@@ -46,17 +46,18 @@ export async function createUser(name, email, phoneNumber,password) {
 export const login = async (email,pass) => {
     try{
         const password = CryptoJS.AES.decrypt(pass,"You bleed just to know you're alive").toString(CryptoJS.enc.Utf8);
-        await signIn("credentials",{email,password,redirect:false});
-        const activity = new AdminActivity({
-            name:"SYSTEM LOGIN",
-            activity : {
-                admin: user.name,
-                adminId: user._id,
-                action: `Logged in at ${new Date()}`
-            },
-            date:Date.now()
-        })
-        await activity.save();
+        const sess = await signIn("credentials",{email,password,redirect:false});
+        // const {user} = await auth();
+        // const activity = new AdminActivity({
+        //     name:"SYSTEM LOGIN",
+        //     activity : {
+        //         admin: user.name,
+        //         adminId: user._id,
+        //         action: `Logged in at ${new Date()}`
+        //     },
+        //     date:Date.now()
+        // })
+        // await activity.save();
         return {status:200};
     }catch(error){
         return {message:error.message,status:500};
@@ -262,7 +263,7 @@ export const editFilterData = async({clientId,sedimentFilter,u3_ChangeDate,ro_Ch
 
 export const setGoogleSignIn = async(choice)=> {
     try {
-        const user  = await auth();
+        const {user}  = await auth();
         await db.connect();
         const system = await System.findOne();
         await system.updateOne({googleSignIn:choice});
@@ -284,7 +285,7 @@ export const setGoogleSignIn = async(choice)=> {
 
 export const removeAdminSlot = async()=> {
     try {
-        const user = await auth();
+        const {user} = await auth();
         await db.connect();
         const system = await System.findOne();
         const accounts = system.adminAccounts;
@@ -307,7 +308,7 @@ export const removeAdminSlot = async()=> {
 
 export const addAdminSlot = async()=> {
     try {
-        const user = await auth();
+        const {user} = await auth();
         await db.connect();
         const system = await System.findOne();
         const accounts = system.adminAccounts;
@@ -330,7 +331,7 @@ export const addAdminSlot = async()=> {
 
 export const deleteAdmin = async(id,email)=> {
     try {
-        const user = await auth();
+        const {user} = await auth();
         await db.connect();
         const loggedUser = await User.find({email});
         if(loggedUser.email !== "drwangeci@gmail.com" && !loggedUser.isSuperAdmin){
@@ -354,10 +355,11 @@ export const deleteAdmin = async(id,email)=> {
     }
 }
 
-export const editUserProfile = async(name,phoneNumber,bio,email)=> {
+export const editUserProfile = async(name,phoneNumber,bio,)=> {
     try {
         await db.connect();
-        const res = await User.findOneAndUpdate({email},{name,phoneNumber:Number(phoneNumber),bio},{new:true});
+        const {user} = await auth();
+        await User.findByIdAndUpdate(user._id,{name,phoneNumber:Number(phoneNumber),bio});
         const activity = new AdminActivity({
             name:"UPDATE ADMIN PROFILE",
             activity : {
@@ -370,6 +372,28 @@ export const editUserProfile = async(name,phoneNumber,bio,email)=> {
         await activity.save();
         await db.disconnect();
         return{status:200,body:res};
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}
+
+export const changeProfilePic = async(uploadedPic)=> {
+    try {
+        const {user} = await auth();
+        await db.connect();
+        await User.findByIdAndUpdate(user._id,{image:uploadedPic});
+        const activity = new AdminActivity({
+            name:"UPDATE ADMIN PROFILE PICTURE",
+            activity : {
+                admin: user.name,
+                adminId: user._id,
+                action: `Changed profile profile for ${user.name}`
+            },
+            date:Date.now()
+        })
+        await activity.save();
+        await db.disconnect();
+        return{status:201};
     } catch (error) {
         return {status:500,error:error.message}
     }
