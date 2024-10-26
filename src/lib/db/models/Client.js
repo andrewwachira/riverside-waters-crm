@@ -9,7 +9,8 @@ const clientSchema = new mongoose.Schema(
         contactPerson:{
             name: {type:String},
             phoneNumber:{type:String}
-        }, 
+        },
+        dateOfInstallation : {type:Date, required:true}
     },
     {
         timestamps:true

@@ -8,6 +8,7 @@ import CryptoJS from "crypto-js";
 import Filter from "@/lib/db/models/Filter";
 import System from "@/lib/db/models/System";
 import AdminActivity from "@/lib/db/models/AdminActivity";
+import moment from "moment";
 
 export async function createUser(name, email, phoneNumber,password) {
     try{
@@ -73,7 +74,7 @@ export const sendResetLink = async (email) => {
     
 }
 
-export const createClientForm1 = async (firstName,lastName,phoneNumber,residence,contactName,contactCell) => {
+export const createClientForm1 = async (firstName,lastName,phoneNumber,residence,contactName,contactCell,dateOfInstallation) => {
     try {
         const {user} = await auth();
         if(!user){
@@ -85,7 +86,8 @@ export const createClientForm1 = async (firstName,lastName,phoneNumber,residence
             contactPerson:{
                 name:contactName,
                 phoneNumber:contactCell
-            }
+            },
+            dateOfInstallation
         });
         await client.save();
         const activity = new AdminActivity({
@@ -148,7 +150,10 @@ export const saveFilterInfo = async ({clientID,clientName,sedimentFilter,u3_Chan
             const filterInfo =  new Filter({
                 clientId : clientID,
                 sedimentFilter,
-                u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate,
+                u3_ChangeDate: moment(client.dateOfInstallation).add(u3_ChangeDate,"M"),
+                ro_ChangeDate : moment(client.dateOfInstallation).add(ro_ChangeDate,"M"),
+                pc_ChangeDate :  moment(client.dateOfInstallation).add(pc_ChangeDate,"M"),
+                rc_ChangeDate: moment(client.dateOfInstallation).add(rc_ChangeDate,"M"),
                 changeHistory:[
                     {
                         adminId : user._id,
@@ -172,11 +177,15 @@ export const saveFilterInfo = async ({clientID,clientName,sedimentFilter,u3_Chan
         }else{
            const res = await prevInfo.updateOne({clientId:clientID},{
                 hasSedimentFilter:sedimentFilter,
-                u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate,
+                u3_ChangeDate : moment(prevInfo.u3_ChangeDate).add(u3_ChangeDate,"M"),
+                ro_ChangeDate : moment(prevInfo.u3_ChangeDate).add(ro_ChangeDate,"M"),
+                pc_ChangeDate : moment(prevInfo.u3_ChangeDate).add(pc_ChangeDate,"M"),
+                rc_ChangeDate : moment(prevInfo.u3_ChangeDate).add(rc_ChangeDate,"M"),
                 $push:{changeHistory:
                     {
                         adminId : user._id,
                         comments: adminComments,
+                        $push:{previousDates :{u3: prevInfo.u3_ChangeDate,ro: prevInfo.ro_ChangeDate,pc: prevInfo.pc_ChangeDate,rc: prevInfo.rc_ChangeDate,}}, 
                         date: Date()
                     }
                 }
@@ -194,6 +203,46 @@ export const saveFilterInfo = async ({clientID,clientName,sedimentFilter,u3_Chan
 
             return {status:201,message:`Filter information for ${clientName} saved successfully`}
         }
+        
+    } catch (error) {
+        return {status:500, message:error.message}
+    }
+}
+
+export const saveTestInfo = async (florideTest, otherTests,clientID,) => {
+    try {
+        const {user} = await auth();
+        if(!user){
+            return {message:"This operation is only possible if you are logged in as an admin",status:403};
+        }
+        await db.connect();
+        const client = await Client.findById(clientID);
+        const filterInfo =  new Test({
+            clientId : clientID,
+            testResults:
+                {
+                    florideTest,
+                    otherTest: [
+                        {
+                            name: testNames,
+                            value:testResults,
+                            file: testFiles
+                        }
+                    ],
+                }
+        });
+        await filterInfo.save();
+        const activity = new AdminActivity({
+            name:"CLIENT FILTER REGISTRATION",
+            activity : {
+                admin: user.name,
+                adminId: user._id,
+                action: `Registered filters for ${client.firstName} ${client.lastName}`
+            },
+            date:Date.now()
+        })
+        await activity.save();
+        return {status:201,message:`this functionality is currently under development`}
         
     } catch (error) {
         return {status:500, message:error.message}

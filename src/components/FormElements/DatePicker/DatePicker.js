@@ -22,7 +22,7 @@ const DatePicker = ({labelName,inputName,getDatefn,Err,clearWarning,prevData}) =
     }
   }, [getDatefn, inputName,clearWarning,prevData]);
   
-
+ 
   return (
     <div>
       <label className="mb-3 block text-sm font-medium text-black dark:text-white">

@@ -105,19 +105,19 @@ async function Clients({params}) {
 
               <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
                 <div className="border-b border-stroke flex tems-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white sm:block`}>{filterInfo?.sedimentFilter ? "Yes" : "No"}</p>
+                  <p className={`text-black sm:block`}>{filterInfo?.sedimentFilter ? "Yes" : "No"}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.u3_ChangeDate)?.toDateString()}</p>
+                  <p className={`text-black ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.u3_ChangeDate)?.toDateString()}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.ro_ChangeDate)?.toDateString()}</p>
+                  <p className={`text-black ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.ro_ChangeDate)?.toDateString()}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.pc_ChangeDate)?.toDateString()}</p>
+                  <p className={`text-black ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.pc_ChangeDate)?.toDateString()}</p>
                 </div>
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                  <p className={`text-black dark:text-white ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.rc_ChangeDate)?.toDateString()}</p>
+                  <p className={`text-black ${getDateDiff(filterInfo?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo?.rc_ChangeDate)?.toDateString()}</p>
                 </div>
               </div>
             </div>

@@ -1,8 +1,9 @@
 "use client";
 import {useState,useEffect} from 'react';
 import DatePicker from '../FormElements/DatePicker/DatePicker';
+import DatePicker2 from '../FormElements/DatePicker/Datepicker2';
 import { useForm } from 'react-hook-form';
-import { createClientForm1,getClients, saveFilterInfo } from '@/actions/server';
+import { createClientForm1,getClients, saveFilterInfo, saveTestInfo } from '@/actions/server';
 import useColorMode from '@/hooks/useColorMode';
 import { UploadButton } from '@/lib/utils/uploadthing';
 import toast from 'react-hot-toast';
@@ -18,9 +19,12 @@ function Forms() {
     const [nextId, setNextId] = useState(0);
     const [filterDates,setFilterDates] = useState([]);
     const [clients,setClients]  = useState([]);
+    const [clientsLoading,setClientsLoading]  = useState(false);
     const [selectedClient,setSelectedClient] = useState("");
     const [selectClientErr,setSelectClientErr] = useState(false);
     const [hasSedimentFilter,setHasSedimentFilter] = useState(false);
+    const [doi,setDoi] = useState(false);
+    const [doiErr,setDoiErr] = useState(false);
     const [u3,setU3] = useState(false);
     const [ro,setRo] = useState(false);
     const [pc,setPc] = useState(false);
@@ -34,8 +38,10 @@ function Forms() {
     
     useEffect( ()=>{
         const fetchClients = async () => {
+            setClientsLoading(true);
             const clients = await getClients();
             setClients(clients);
+            setClientsLoading(false);
         }
      fetchClients()
      
@@ -80,14 +86,21 @@ function Forms() {
     const getDate= (date,inputName) => {
         setFilterDates(prevState =>  [...prevState,{filterName:inputName,date}]);
     }
+    const getDOIDate= (date,inputName) => {
+        setDoi(date);
+    }
    
     const handleClientRegistration = async({firstName,lastName,phoneNumber,residence,contactName,contactCell}) => {
-        const saveClient = await createClientForm1(firstName,lastName,phoneNumber,residence,contactName,contactCell);
+        if(!doi){
+            setDoiErr(true);
+            return
+        }
+        const saveClient = await createClientForm1(firstName,lastName,phoneNumber,residence,contactName,contactCell,doi);
         if (saveClient.status === 201) {
-            toast.success("Client created successfully");
             setTrigger(true);
             reset();
             setClientFormOpen(false);
+            toast.success("Client created successfully");
         }else{
             toast.error(saveClient.error)
         }
@@ -120,21 +133,25 @@ function Forms() {
                 if(item == "rc") setRc(true);
             }
 
-      }else{
-        const filterData =  {
-            clientID : selectedClient,
-            clientName: clients.find(client=> client._id === selectedClient).firstName,
-            sedimentFilter: hasSedimentFilter,
-            u3_ChangeDate : filterDates.find(date=> date.filterName === "u3").date,
-            ro_ChangeDate : filterDates.find(date=> date.filterName === "ro").date,
-            pc_ChangeDate : filterDates.find(date=> date.filterName === "pc").date,
-            rc_ChangeDate : filterDates.find(date=> date.filterName === "rc").date,
-            adminComments
+        }else{
+            const filterData =  {
+                clientID : selectedClient,
+                clientName: clients.find(client=> client._id === selectedClient).firstName,
+                sedimentFilter: hasSedimentFilter,
+                u3_ChangeDate : filterDates.find(date=> date.filterName === "u3").date,
+                ro_ChangeDate : filterDates.find(date=> date.filterName === "ro").date,
+                pc_ChangeDate : filterDates.find(date=> date.filterName === "pc").date,
+                rc_ChangeDate : filterDates.find(date=> date.filterName === "rc").date,
+                adminComments
+            }
+            const res = await saveFilterInfo(filterData);
+            if(res.status === 201){
+                toast.success(res.message);
+                setFilterFormOpen(false);
+                setFilterDates([]);
+                setTimeout(()=>window.location.reload(),1500);
+            }
         }
-        const res = await saveFilterInfo(filterData);
-        if(res.status === 201)alert(res.message);
-
-      }
     }
     const clearWarning = (filterName) => {
         if(filterName == "u3") setU3(false);
@@ -142,7 +159,8 @@ function Forms() {
         if(filterName == "pc") setPc(false);
         if(filterName == "rc") setRc(false);
     }
-    const handleTestForm = async({rawFT,treatedFT,testClient,})=> {
+    const handleTestForm = async({rawFT,treatedFT,fTFile,testClient,})=> {
+        const res = await saveTestInfo(rawFT,treatedFT,fTFile, testNames,testFiles,testResults);
         console.log(testNames,testFiles,testResults);
     }
   return (
@@ -191,6 +209,9 @@ function Forms() {
                             <label className="mb-3 block text-sm font-medium text-black dark:text-white">Contact Person Phone Number</label>
                             <input name="contactCell" {...register("contactCell")}  placeholder="0720-123-123" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactCell && "border-danger"}`} type="tel"/>
                             {errors.contactCell && <div className='text-rose-500'>{errors?.contactCell?.message}</div>}
+                        </div>
+                        <div className="mb-4.5">
+                            <div className="my-4.5"><DatePicker inputName="doi"  getDatefn={getDOIDate} Err={doiErr} clearWarning={clearWarning} labelName="Date of Installation"/></div>   
                         </div>
                         <button type='submit' className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">Save Client</button>
                     </div>
@@ -249,20 +270,22 @@ function Forms() {
                     </div>
                     
                     <div className="p-6.5">
-                        <div className="my-4.5"><DatePicker inputName="u3" getDatefn={getDate} Err={u3} clearWarning={clearWarning} labelName="ultra 3 filter Change Date"/></div>
-                        <div className="my-4.5"><DatePicker inputName="ro" getDatefn={getDate} Err={ro} clearWarning={clearWarning} labelName="Reverse Osmosis Change Date"/></div>
-                        <div className="my-4.5"><DatePicker inputName="pc" getDatefn={getDate} Err={pc} clearWarning={clearWarning} labelName="Post Carbon filter Change Date"/></div>
-                        <div className="my-4.5"><DatePicker inputName="rc" getDatefn={getDate} Err={rc} clearWarning={clearWarning} labelName="Remineralyzing Cartilage Change Date"/></div> 
+                        <div className="my-4.5"><DatePicker2 inputName="u3" getDatefn={getDate} Err={u3} clearWarning={clearWarning} labelName="ultra 3 filter Change Date"/></div>
+                        <div className="my-4.5"><DatePicker2 inputName="ro" getDatefn={getDate} Err={ro} clearWarning={clearWarning} labelName="Reverse Osmosis Change Date"/></div>
+                        <div className="my-4.5"><DatePicker2 inputName="pc" getDatefn={getDate} Err={pc} clearWarning={clearWarning} labelName="Post Carbon filter Change Date"/></div>
+                        <div className="my-4.5"><DatePicker2 inputName="rc" getDatefn={getDate} Err={rc} clearWarning={clearWarning} labelName="Remineralyzing Cartilage Change Date"/></div> 
                         <div className="w-full my-4.5">
-                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments</label>
-                                <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Enter your comments/notes on this filter change" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
+                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
+                                <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Notes for this filter change e.g 'First installation', 'first filter change cycle'" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
                         </div>
                         <button type="submit" className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white hover:bg-opacity-90">Save Filter Info</button>
                     </div>
                 </form>
             </div>
         </div>
-    {/* Test Form */}
+
+    {/* Test Form=================================================================================================================================== */}
+    
         <div className="flex m-5 flex-col gap-9">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div onClick={()=>setTestFormOpen(!testFormOpen)} className="border-b border-stroke bg-blue-700 rounded-md text- px-6.5 py-4 dark:border-strokedark flex justify-between">
@@ -276,37 +299,43 @@ function Forms() {
                 </div>
                 <form onSubmit={handleSubmit3(handleTestForm)}  id="test-results-form" className={testFormOpen ? "block" : "hidden"}>
                     <div className=" p-6.5">
-                            <label className="mb-2.5 block text-black dark:text-white"> Client </label>
-                            <div className="relative z-20 bg-transparent dark:bg-form-input">
-                                <select {...register3("testClient",{required:"this field is required"})}className="relative z-20  w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ">
+                        <label className="mb-2.5 block text-black dark:text-white"> Client </label>
+                        <div className="relative z-20 bg-transparent dark:bg-form-input">
+                            <select {...register3("testClient",{required:"this field is required"})}className="relative z-20  w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ">
                                 <option value="" disabled="" className="text-body dark:text-bodydark">Select Client</option>
                                     {
+                                        clientsLoading ?
+                                        <option>Loading data..</option>
+                                        :
+                                        clients.length < 1 ?
+                                        <option className='rounded-md border border-rose-500 mb-5 w-full bg-rose-200'><p className='p-5 text-center text-lg text-rose-700'>No Client has been registered yet.</p></option>
+                                        :
                                         clients?.map(client => (
                                             <option key={client._id} value={client.firstName} className="text-body dark:text-bodydark" >{client.firstName + " " + client.lastName}</option>
                                         ))
                                     }
-                                </select>
-                                <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
-                                    <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <g opacity="0.8">
-                                            <path fillRule="evenodd" clipRule="evenodd" d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z" fill=""></path>
-                                        </g>
-                                    </svg>
-                                </span>
-                            </div>
-                            {errors3?.testClient && <div className='text-rose-500'>{errors3?.testClient?.message}</div>}
+                            </select>
+                            <span className="absolute right-4 top-1/2 z-30 -translate-y-1/2">
+                                <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g opacity="0.8">
+                                        <path fillRule="evenodd" clipRule="evenodd" d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z" fill=""></path>
+                                    </g>
+                                </svg>
+                            </span>
+                        </div>
+                        {errors3?.testClient && <div className='text-rose-500'>{errors3?.testClient?.message}</div>}
                     </div>
                     
                     <div className="p-6.5">
                         <div className="mb-6 flex flex-col gap-6 xl:flex-row">
                             <div className="mb-4.5 w-full xl:w-1/2">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white"> Raw Floride Test</label>
-                                <input placeholder="Enter Raw Floride results" {...register3("rawFT",{required:"This field is required"})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                                <input placeholder="Enter Raw Floride results" {...register3("rawFT")} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                                 {errors3?.rawFT && <div className='text-rose-500'>{errors3?.rawFT?.message}</div>}
                             </div>
                             <div className="mb-4.5 w-full xl:w-1/2">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Treated Floride Test </label>
-                                <input placeholder="Enter Treated Floride results" {...register3("treatedFT",{required:"This field is required"})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                                <input placeholder="Enter Treated Floride results" {...register3("treatedFT")} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                                 {errors3?.treatedFT && <div className='text-rose-500'>{errors3?.treatedFT?.message}</div>}
                             </div>
                             <div className="mb-4.5 w-full xl:w-1/2">

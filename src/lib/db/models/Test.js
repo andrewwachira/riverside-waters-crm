@@ -3,25 +3,23 @@ import mongoose from "mongoose";
 const testSchema = new mongoose.Schema(
     {    
         clientId : {type: mongoose.Schema.Types.ObjectId,ref:"Client",required:true},
-        testResults:[
+        testResults:
             {
-                testDate: {type:Date},
-                florideTest: {type: Number},
-                testsPassed:{type:Boolean},
+                florideTest: {
+                    raw : {type:Number},
+                    treated : {type:Number},
+                    file : {type:String},
+                    date: {type: Date}
+                },
                 otherTest: [
                     {
                         name: {type:String},
-                        value:{type:Number}
+                        value:{type:Number},
+                        file : {type:String},
+                        date: {type:Date}
                     }
                 ],
-                attachments : [
-                    {
-                        test:{type:String},
-                        srcUrl: {type:String}
-                    }
-                ]
             }
-        ],
     },
     {
         timestamps:true
