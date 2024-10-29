@@ -65,6 +65,16 @@ export const login = async (email,pass) => {
     }
     
 }
+export const getLoginDefaults = async () => {
+    try {
+        await db.connect();
+        const system = await System.findOne().select("googleSignIn adminAccounts");
+        const users = await User.collection.countDocuments();
+        return ({status:200,system,users});
+    } catch (error) {
+        return ({status:500,error:error.message})
+    }
+}
 export const sendResetLink = async (email) => {
     try{
         

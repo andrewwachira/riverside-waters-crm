@@ -5,7 +5,6 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { getClients } from '@/actions/server';
 import toast from 'react-hot-toast';
 import Image from "next/image";
-import { Lavishly_Yours } from "next/font/google";
 
 function RSW() {
     const [clients,setClients]  = useState([]);
@@ -13,7 +12,6 @@ function RSW() {
     const [selectedClients, setSelectedClients] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
     const [dropOpen,setDropOpen] = useState(false);
-    const [clientErr,setClientErr] = useState(false);
     const [message,setMessage] = useState("");
 
     useEffect(()=>{
@@ -25,7 +23,7 @@ function RSW() {
         }
      fetchClients();
     },[])
-    console.log(clients);
+
     const handleSelectAllChange = () => {
         setSelectAll(!selectAll);
         if (!selectAll) {
@@ -100,7 +98,6 @@ function RSW() {
                                 </svg>
                             </span>
                         </div>
-                        {clientErr && <div className='text-rose-500'>Select atleast one client</div>}
                     </div>
                     <div className="p-6.5">
                         <label className="mb-2.5 block text-black dark:text-white">Message</label>

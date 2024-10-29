@@ -4,12 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Montserra } from "@/app/fonts/index";
 import { useForm } from "react-hook-form";
-import { login} from "@/actions/server";
+import { login,getLoginDefaults} from "@/actions/server";
 import {useRouter} from "next/navigation";
 import { useSession,signIn} from "next-auth/react";
 import CryptoJS from "crypto-js";
 import toast from "react-hot-toast";
-import useSWR from "swr";
 
 export default function SignIn(){
   const {register,handleSubmit,formState:{errors}} = useForm();
@@ -17,16 +16,24 @@ export default function SignIn(){
   const [message,setMessage] = useState(null);
   const [loading,setLoading] = useState(false);
   const [googleLoading,setGoogleLoading] = useState(false);
+  const [systemData,setSystemData] = useState(null);
+  const [systemDataErr,setSystemDataErr] = useState(false);
   const router = useRouter();
   const {status} = useSession();
-  const getSystemData = async (key)=> {
-    setGoogleLoading(true);
-      const res = await fetch(key);
-      if(res)setGoogleLoading(false);
-      return res.json();
-    }
-  const {data:systemData,error:err} = useSWR("/api/system/getLoginDefaults",getSystemData,{revalidateOnFocus: false,refreshInterval:60000});
+  
   useEffect(()=>{
+    const getSystemData = async ()=> {
+        setGoogleLoading(true);
+        const data = await getLoginDefaults();
+        console.log(data);
+        setGoogleLoading(false);
+        if(data.status !== 200) {
+          setSystemDataErr(true)
+        }else{
+           setSystemData(data);
+        }
+      }
+      getSystemData();
     if(status === "authenticated"){
       toast.success("Login successfull",{position:"top-center",duration: 2000,});
       router.push("/dashboard");
@@ -138,8 +145,8 @@ export default function SignIn(){
                 </button>
                 
               </form>
-              { err ? 
-              <div className="w-full border border-rose-600 rounded-md m-auto mx-4 mb-4 text-center my-3 bg-rose-200 p-3 text-rose-800">{err}</div>
+              { systemDataErr ? 
+              <div className="w-full border border-rose-600 rounded-md m-auto mx-4 mb-4 text-center my-3 bg-rose-200 p-3 text-rose-800">Error getting google signin permissions</div>
               :
               googleLoading ?
                 <div className="flex h-full items-center justify-center bg-white ">
