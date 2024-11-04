@@ -147,7 +147,7 @@ export const getClients = async () => {
     }
 }
 
-export const saveFilterInfo = async ({clientID,clientName,sedimentFilter,u3_ChangeDate,pc_ChangeDate,ro_ChangeDate,rc_ChangeDate,adminComments}) => {
+export const saveFilterInfo = async ({clientID,clientName,preFilter,u3_ChangeDate,pc_ChangeDate,ro_ChangeDate,rc_ChangeDate,changeCycle,adminComments}) => {
     try {
         const {user} = await auth();
         if(!user){
@@ -155,65 +155,29 @@ export const saveFilterInfo = async ({clientID,clientName,sedimentFilter,u3_Chan
         }
         await db.connect();
         const client = await Client.findById(clientID);
-        const prevInfo = await Filter.findById(clientID);
-        if(!prevInfo){
-            const filterInfo =  new Filter({
-                clientId : clientID,
-                sedimentFilter,
-                u3_ChangeDate: moment(client.dateOfInstallation).add(u3_ChangeDate,"M"),
-                ro_ChangeDate : moment(client.dateOfInstallation).add(ro_ChangeDate,"M"),
-                pc_ChangeDate :  moment(client.dateOfInstallation).add(pc_ChangeDate,"M"),
-                rc_ChangeDate: moment(client.dateOfInstallation).add(rc_ChangeDate,"M"),
-                changeHistory:[
-                    {
-                        adminId : user._id,
-                        comments: adminComments,
-                        date: Date()
-                    }
-                ]
-            });
-            await filterInfo.save();
-            const activity = new AdminActivity({
-                name:"CLIENT FILTER REGISTRATION",
-                activity : {
-                    admin: user.name,
-                    adminId: user._id,
-                    action: `Registered filters for ${client.firstName} ${client.lastName}`
-                },
-                date:Date.now()
-            })
-            await activity.save();
-            return {status:201,message:`Filter information for ${clientName} saved successfully`}
-        }else{
-           const res = await prevInfo.updateOne({clientId:clientID},{
-                hasSedimentFilter:sedimentFilter,
-                u3_ChangeDate : moment(prevInfo.u3_ChangeDate).add(u3_ChangeDate,"M"),
-                ro_ChangeDate : moment(prevInfo.u3_ChangeDate).add(ro_ChangeDate,"M"),
-                pc_ChangeDate : moment(prevInfo.u3_ChangeDate).add(pc_ChangeDate,"M"),
-                rc_ChangeDate : moment(prevInfo.u3_ChangeDate).add(rc_ChangeDate,"M"),
-                $push:{changeHistory:
-                    {
-                        adminId : user._id,
-                        comments: adminComments,
-                        $push:{previousDates :{u3: prevInfo.u3_ChangeDate,ro: prevInfo.ro_ChangeDate,pc: prevInfo.pc_ChangeDate,rc: prevInfo.rc_ChangeDate,}}, 
-                        date: Date()
-                    }
-                }
-            })
-            const activity = new AdminActivity({
-                name:"CLIENT FILTER UPDATE",
-                activity : {
-                    admin: user.name,
-                    adminId: user._id,
-                    action: `Updated filters for ${client.firstName} ${client.lastName}`
-                },
-                date:Date.now()
-            })
-            await activity.save();
-
-            return {status:201,message:`Filter information for ${clientName} saved successfully`}
-        }
-        
+        const filterInfo =  new Filter({
+            clientId : clientID,
+            preFilter,
+            u3_ChangeDate: moment(client.dateOfInstallation).add(u3_ChangeDate,"M"),
+            ro_ChangeDate : moment(client.dateOfInstallation).add(ro_ChangeDate,"M"),
+            pc_ChangeDate :  moment(client.dateOfInstallation).add(pc_ChangeDate,"M"),
+            rc_ChangeDate: moment(client.dateOfInstallation).add(rc_ChangeDate,"M"),
+            changeCycle,
+            adminId : user._id,
+            comments: adminComments,
+        });
+        await filterInfo.save();
+        const activity = new AdminActivity({
+            name:"CLIENT FILTER REGISTRATION",
+            activity : {
+                admin: user.name,
+                adminId: user._id,
+                action: `Registered filters for ${client.firstName} ${client.lastName}`
+            },
+            date:Date.now()
+        })
+        await activity.save();
+        return {status:201,message:`Filter information for ${clientName} saved successfully`}
     } catch (error) {
         return {status:500, message:error.message}
     }
@@ -234,9 +198,10 @@ export const saveTestInfo = async (florideTest, otherTests,clientID,) => {
                     florideTest,
                     otherTest: [
                         {
-                            name: testNames,
+                            name: otherTests[0].testName,
                             value:testResults,
-                            file: testFiles
+                            file: testFiles,
+                            date: testDate
                         }
                     ],
                 }

@@ -29,13 +29,19 @@ function Forms() {
     const [ro,setRo] = useState(false);
     const [pc,setPc] = useState(false);
     const [rc,setRc] = useState(false);
+    const [tD,setTd] = useState(false);//test Date error
     const [adminComments,setAdminComments]  = useState("");
     const [fTFile,setFTFile] = useState(null);
+    const [fTDate,setFTDate] = useState(null);
     const [testFiles,setTestFiles] = useState([]);
     const [testNames,setTestNames] = useState([]);
     const [testResults,setTestResults] = useState([]);
+    const [testDates,setTestDates] = useState([]);
     const [trigger,setTrigger] = useState(false);
-    
+    const [changeCycle,setChangeCycle] = useState(null);
+    const [changeCycleErr,setChangeCycleErr] = useState(null);
+    const [preFilter,setPreFilter] = useState(null);
+
     useEffect( ()=>{
         const fetchClients = async () => {
             setClientsLoading(true);
@@ -46,24 +52,27 @@ function Forms() {
      fetchClients()
      
     },[colorMode,trigger])
-
+    // console.log(testNames,testResults,testDates);
     const addRow = () =>{
         const newRow = {
             id:nextId,
             component: (
-                <div className="mb-6 flex flex-col gap-6 xl:flex-row items-center justify-center" key={nextId}>
-                    <div className="w-full xl:w-1/2">
+                <div className="mb-6 flex flex-col gap-6 xl:grid xl:grid-cols-2 items-center justify-center" key={nextId}>
+                    <div className="mb-4.5 w-full ">
+                        <DatePicker inputName={`testDate${nextId}`} nextId={nextId} labelName={`Test Date`}  getTestDateFn={(date)=>getTestDateFn(date,nextId)} />
+                    </div>
+                    <div className="w-full ">
                         <label name={`testName${nextId}`}  className="mb-3 block text-sm font-medium text-black dark:text-white">Test Name</label>
-                        <input placeholder="Enter Test Name" onChange={(e)=>setTestNames(...testNames,{testName:e.target.value, testNameId:nextId})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                        <input placeholder="Enter Test Name" onChange={(e)=>setTestNames([...testNames,{testName:e.target.value, testId:nextId}])} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                     </div>
-                    <div className="w-full xl:w-1/2">
+                    <div className="w-full">
                         <label name={`testResult${nextId}`} className="mb-3 block text-sm font-medium text-black dark:text-white">Test Result</label>
-                        <input placeholder="Enter Test Result" onChange={(e)=>setTestResults(...testResults,{testResult:e.target.value, testResultId:nextId})} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
+                        <input placeholder="Enter Test Result" onChange={(e)=>setTestResults([...testResults,{testResult:e.target.value, testId:nextId}])} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                     </div>
-                    <div className="w-full xl:w-1/2">
+                    <div className="w-full ">
                         <label name={`testFile${nextId}`} className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Test Result</label>
                         <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 " endpoint="imageUploader" onClientUploadComplete={(res) => {
-                        setTestFiles(...testFiles,{testFileUrl:res,testFileId:nextId});
+                        setTestFiles([...testFiles,{testFileUrl:res,testId:nextId}]);
                         alert("Upload Completed");
                         }}
                         onUploadError={(error) => {
@@ -74,7 +83,7 @@ function Forms() {
                     
                     <div>
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">Action</label>
-                        <button type='button' onClick={()=>setInputRows(inputRows.filter((row)=>(row.id !== nextId)))} className='text-white bg-rose-500 rounded-md py-3 px-5'>Remove</button>
+                        <button type='button' onClick={()=>{setInputRows(prevState => prevState.filter((row)=>(row.id !== nextId))); setNextId(inputRows.length)}} className='text-white bg-rose-500 rounded-md py-3 px-5'>Remove</button>
                     </div>
                 </div>
             )
@@ -82,12 +91,20 @@ function Forms() {
     setInputRows([...inputRows,newRow])
     setNextId(nextId+1); 
     }       
-    
+    //the function below gathers date inputs for all the 4 filters. 
     const getDate= (date,inputName) => {
         setFilterDates(prevState =>  [...prevState,{filterName:inputName,date}]);
     }
-    const getDOIDate= (date,inputName) => {
+    //DOI means Date of Installation. A date that could be in the future,present or past.
+    const getDOIDate= (date) => {
         setDoi(date);
+    }
+    const getFTDate= (date) => {
+        setFTDate(date);
+    }
+    const getTestDateFn= (date,nextId) => {
+        if(!date) setTd(true);
+        else setTestDates(prev => [...prev,{testDate:date, testId:nextId}]);
     }
    
     const handleClientRegistration = async({firstName,lastName,phoneNumber,residence,contactName,contactCell}) => {
@@ -109,7 +126,10 @@ function Forms() {
         e.preventDefault()
         if(!selectedClient){
             setSelectClientErr(true);
-
+            return
+        }
+        if(!changeCycle){
+            setChangeCycleErr(true);
         }
         if(filterDates.length !== 4){
             const unfilled = []
@@ -137,11 +157,12 @@ function Forms() {
             const filterData =  {
                 clientID : selectedClient,
                 clientName: clients.find(client=> client._id === selectedClient).firstName,
-                sedimentFilter: hasSedimentFilter,
+                preFilter,
                 u3_ChangeDate : filterDates.find(date=> date.filterName === "u3").date,
                 ro_ChangeDate : filterDates.find(date=> date.filterName === "ro").date,
                 pc_ChangeDate : filterDates.find(date=> date.filterName === "pc").date,
                 rc_ChangeDate : filterDates.find(date=> date.filterName === "rc").date,
+                changeCycle,
                 adminComments
             }
             const res = await saveFilterInfo(filterData);
@@ -159,10 +180,27 @@ function Forms() {
         if(filterName == "pc") setPc(false);
         if(filterName == "rc") setRc(false);
     }
-    const handleTestForm = async({rawFT,treatedFT,fTFile,testClient,})=> {
-        const res = await saveTestInfo(rawFT,treatedFT,fTFile, testNames,testFiles,testResults);
-        console.log(testNames,testFiles,testResults);
+    const handleTestForm = async({rawFT,treatedFT,fTFile,testClient,})=> { 
+        const groupedDataMap = new Map();// Initialize an empty Map to store data grouped by testId
+        const addToGroupedData = (array, key) => {// Helper function to add items to the Map by testId
+            array.forEach(item => {
+                const { testId, ...rest } = item; // Separate testId from the other data fields
+                if (!groupedDataMap.has(testId)) {
+                groupedDataMap.set(testId, { testId }); // Initialize entry if not present
+                }
+                Object.assign(groupedDataMap.get(testId), rest); // Merge data fields
+            });
+        };
+        // Populate the Map with data from each array
+        addToGroupedData(testDates, "testDate");
+        addToGroupedData(testNames, "testName");
+        addToGroupedData(testResults, "testResult");
+        addToGroupedData(testFiles, "testFile");
+        // Convert the Map into an array of objects
+        const groupedTests = Array.from(groupedDataMap.values());
+        const res = await saveTestInfo(rawFT,treatedFT,fTFile,groupedTests,testClient);
     }
+
   return (
     <div className="">
         <div className="flex m-5 flex-col gap-9">
@@ -218,7 +256,9 @@ function Forms() {
                 </form>
             </div>
         </div>
-    {/* Filter form */}
+
+    {/* Filter form ============================================================================================================================================*/}
+        
         <div className="flex m-5 flex-col gap-9">
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                 <div onClick={()=>setFilterFormOpen(!filterFormOpen)} className="border-b border-stroke px-6.5 py-4 bg-blue-800 rounded-md dark:border-strokedark flex justify-between">
@@ -252,21 +292,19 @@ function Forms() {
                             </div>
                             {selectClientErr && <div className='text-rose-600'>Select the client the filter is for</div>}
                     </div>
-                    <div className="p-6.5 flex items-center justify-between">
-                       <label htmlFor="formCheckbox" className="flex cursor-pointer">
-                            <div className="relative">
-                                <input id="formCheckbox"  onChange={(e)=> setHasSedimentFilter(e.target.value == "on" ? true : false)} className="taskCheckbox sr-only" type="checkbox"/>
-                                <div className="box mr-3 flex h-5 w-5 items-center justify-center rounded border border-stroke dark:border-strokedark">
-                                    <span className="text-white opacity-0">
-                                        <svg className="fill-current" width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path fillRule="evenodd" clipRule="evenodd" d="M9.70685 0.292804C9.89455 0.480344 10 0.734667 10 0.999847C10 1.26503 9.89455 1.51935 9.70685 1.70689L4.70059 6.7072C4.51283 6.89468 4.2582 7 3.9927 7C3.72721 7 3.47258 6.89468 3.28482 6.7072L0.281063 3.70701C0.0986771 3.5184 -0.00224342 3.26578 3.785e-05 3.00357C0.00231912 2.74136 0.10762 2.49053 0.29326 2.30511C0.4789 2.11969 0.730026 2.01451 0.992551 2.01224C1.25508 2.00996 1.50799 2.11076 1.69683 2.29293L3.9927 4.58607L8.29108 0.292804C8.47884 0.105322 8.73347 0 8.99896 0C9.26446 0 9.51908 0.105322 9.70685 0.292804Z" fill="">
-                                            </path>
-                                        </svg>
-                                    </span>
-                                </div>
+
+                    <div className="p-6.5">
+                        <p className="mb-2.5 block text-black dark:text-white">Pre Filter</p>
+                        <div className='flex mt-3'>
+                            <div className='m-1 flex flex-col-reverse'>
+                                <label htmlFor='formRadio1'>Yes</label>
+                                <input id="formRadio1" name="preFilter"  onChange={(e)=> setPreFilter(true)} type="radio"/>
                             </div>
-                            <p>Client has sediment filter?</p>
-                        </label>
+                            <div className="m-1 ml-5 flex flex-col-reverse">
+                                <label htmlFor='formRadio2'>No</label>
+                                <input id="formRadio2" name="preFilter" onChange={(e)=> setPreFilter(false)} type="radio"/>
+                            </div>
+                        </div>
                     </div>
                     
                     <div className="p-6.5">
@@ -274,6 +312,17 @@ function Forms() {
                         <div className="my-4.5"><DatePicker2 inputName="ro" getDatefn={getDate} Err={ro} clearWarning={clearWarning} labelName="Reverse Osmosis Change Date"/></div>
                         <div className="my-4.5"><DatePicker2 inputName="pc" getDatefn={getDate} Err={pc} clearWarning={clearWarning} labelName="Post Carbon filter Change Date"/></div>
                         <div className="my-4.5"><DatePicker2 inputName="rc" getDatefn={getDate} Err={rc} clearWarning={clearWarning} labelName="Remineralyzing Cartilage Change Date"/></div> 
+                        
+                        <div className='my-4.5'>
+                            <label className="mb-3 block text-sm font-medium text-black dark:text-white">Select Change Cycle</label>
+                            <select  onChange={(e)=>setChangeCycle(e.target.value)}  className={`relative z-20 w-full  rounded border border-stroke px-5 py-3 outline-none transition active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
+                                    <option value={null} >Select...</option>      
+                                    <option value="Installation">Installation</option>      
+                                    {[...Array(10).keys()].map(key=> (
+                                        <option value={key+1} key={key}>Filter Change {key + 1}</option>
+                                    ))}
+                            </select>
+                        </div>
                         <div className="w-full my-4.5">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
                                 <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Notes for this filter change e.g 'First installation', 'first filter change cycle'" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
@@ -325,20 +374,24 @@ function Forms() {
                         </div>
                         {errors3?.testClient && <div className='text-rose-500'>{errors3?.testClient?.message}</div>}
                     </div>
-                    
+              
                     <div className="p-6.5">
-                        <div className="mb-6 flex flex-col gap-6 xl:flex-row">
-                            <div className="mb-4.5 w-full xl:w-1/2">
+                        <div className='heading-separator mb-7'>Floride Tests</div>
+                        <div className="mb-6  flex-col gap-6 xl:grid xl: grid-cols-2">
+                            <div className="mb-4.5 w-full ">
+                                <DatePicker inputName="FTD" labelName="Floride Test Date" getDatefn={getFTDate}/>
+                            </div>
+                            <div className="mb-4.5 w-full">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white"> Raw Floride Test</label>
                                 <input placeholder="Enter Raw Floride results" {...register3("rawFT")} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                                 {errors3?.rawFT && <div className='text-rose-500'>{errors3?.rawFT?.message}</div>}
                             </div>
-                            <div className="mb-4.5 w-full xl:w-1/2">
+                            <div className="mb-4.5 w-full">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Treated Floride Test </label>
                                 <input placeholder="Enter Treated Floride results" {...register3("treatedFT")} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                                 {errors3?.treatedFT && <div className='text-rose-500'>{errors3?.treatedFT?.message}</div>}
                             </div>
-                            <div className="mb-4.5 w-full xl:w-1/2">
+                            <div className="mb-4.5 w-full">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Floride Test Results</label>
                                 <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 dark:border-form-strokedark" endpoint="imageUploader" 
                                 onClientUploadComplete={(res) => {setFTFile(res);alert("Upload Completed");
