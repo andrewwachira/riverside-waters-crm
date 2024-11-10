@@ -7,7 +7,7 @@ const DatePicker2 = ({labelName,inputName,getDatefn,Err,clearWarning,prevData}) 
   
 
   return (
-    <form>
+    <div>
         <label className="mb-3 block text-sm  font-medium text-black dark:text-white">
             {labelName}
         </label>
@@ -34,7 +34,7 @@ const DatePicker2 = ({labelName,inputName,getDatefn,Err,clearWarning,prevData}) 
             </div>
         </div>
         {Err && <div className="text-rose-500">{labelName + " must not be empty"}</div>}
-    </form>
+    </div>
   );
 };
 

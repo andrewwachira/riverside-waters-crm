@@ -7,6 +7,7 @@ import { createClientForm1,getClients, saveFilterInfo, saveTestInfo } from '@/ac
 import useColorMode from '@/hooks/useColorMode';
 import { UploadButton } from '@/lib/utils/uploadthing';
 import toast from 'react-hot-toast';
+import next from 'next';
 
 function Forms() {
     const [colorMode, setColorMode] = useColorMode();
@@ -52,7 +53,7 @@ function Forms() {
      fetchClients()
      
     },[colorMode,trigger])
-    // console.log(testNames,testResults,testDates);
+
     const addRow = () =>{
         const newRow = {
             id:nextId,
@@ -69,21 +70,27 @@ function Forms() {
                         <label name={`testResult${nextId}`} className="mb-3 block text-sm font-medium text-black dark:text-white">Test Result</label>
                         <input placeholder="Enter Test Result" onChange={(e)=>setTestResults([...testResults,{testResult:e.target.value, testId:nextId}])} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                     </div>
-                    <div className="w-full ">
+                    <div className="w-full relative">
                         <label name={`testFile${nextId}`} className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Test Result</label>
-                        <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 " endpoint="imageUploader" onClientUploadComplete={(res) => {
-                        setTestFiles([...testFiles,{testFileUrl:res,testId:nextId}]);
-                        alert("Upload Completed");
+                        <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100" value={testFiles.length>0 && "uploaded"} endpoint="imageUploader" 
+                        onClientUploadComplete={(res) => {
+                            setTestFiles([...testFiles,{testFileUrl:res[0].url,testId:nextId}]);
+                            alert("Upload Completed");
                         }}
                         onUploadError={(error) => {
                         alert(`ERROR! ${error.message}`);
                         }}
                         />
+                         <span className={`absolute top-0 right-0  ${testFiles.includes(testFiles.find(file=> file.testId == nextId))    ? "block" : "hidden"}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#008000" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                        </span> 
                     </div>
                     
                     <div>
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">Action</label>
-                        <button type='button' onClick={()=>{setInputRows(prevState => prevState.filter((row)=>(row.id !== nextId))); setNextId(inputRows.length)}} className='text-white bg-rose-500 rounded-md py-3 px-5'>Remove</button>
+                        <button type='button' onClick={()=>{setInputRows(prevState => prevState.filter((row)=>(row.id !== nextId+1))); setNextId(inputRows.length)}} className='text-white bg-rose-500 rounded-md py-3 px-5'>Remove</button>
                     </div>
                 </div>
             )
@@ -99,7 +106,7 @@ function Forms() {
     const getDOIDate= (date) => {
         setDoi(date);
     }
-    const getFTDate= (date) => {
+    const getFTDate = (date) => {
         setFTDate(date);
     }
     const getTestDateFn= (date,nextId) => {
@@ -180,7 +187,7 @@ function Forms() {
         if(filterName == "pc") setPc(false);
         if(filterName == "rc") setRc(false);
     }
-    const handleTestForm = async({rawFT,treatedFT,fTFile,testClient,})=> { 
+    const handleTestForm = async({rawFT,treatedFT,testClient,})=> { 
         const groupedDataMap = new Map();// Initialize an empty Map to store data grouped by testId
         const addToGroupedData = (array, key) => {// Helper function to add items to the Map by testId
             array.forEach(item => {
@@ -198,7 +205,20 @@ function Forms() {
         addToGroupedData(testFiles, "testFile");
         // Convert the Map into an array of objects
         const groupedTests = Array.from(groupedDataMap.values());
-        const res = await saveTestInfo(rawFT,treatedFT,fTFile,groupedTests,testClient);
+        const florideTest = {
+            raw:rawFT,
+            treated: treatedFT,
+            file:fTFile,
+            date:fTDate
+        }
+
+        const res = await saveTestInfo(florideTest,groupedTests,testClient);
+        if(res.status === 201){
+            toast.success(res.message);
+            setTimeout(()=>window.location.reload(),3000);
+        }else{
+            toast.error(res.message);
+        }
     }
 
   return (
@@ -316,12 +336,13 @@ function Forms() {
                         <div className='my-4.5'>
                             <label className="mb-3 block text-sm font-medium text-black dark:text-white">Select Change Cycle</label>
                             <select  onChange={(e)=>setChangeCycle(e.target.value)}  className={`relative z-20 w-full  rounded border border-stroke px-5 py-3 outline-none transition active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
-                                    <option value={null} >Select...</option>      
+                                    <option value="" >Select...</option>      
                                     <option value="Installation">Installation</option>      
                                     {[...Array(10).keys()].map(key=> (
                                         <option value={key+1} key={key}>Filter Change {key + 1}</option>
                                     ))}
                             </select>
+                            {changeCycleErr && <p className='text-rose-600'>You need to select a filter change round</p>}
                         </div>
                         <div className="w-full my-4.5">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
@@ -354,13 +375,13 @@ function Forms() {
                                 <option value="" disabled="" className="text-body dark:text-bodydark">Select Client</option>
                                     {
                                         clientsLoading ?
-                                        <option>Loading data..</option>
+                                        <option value="">Loading data..</option>
                                         :
                                         clients.length < 1 ?
-                                        <option className='rounded-md border border-rose-500 mb-5 w-full bg-rose-200'><p className='p-5 text-center text-lg text-rose-700'>No Client has been registered yet.</p></option>
+                                        <option value="" className='rounded-md border border-rose-500 mb-5 w-full bg-rose-200 p-5 text-center text-rose-700'>No Client has been registered yet.</option>
                                         :
-                                        clients?.map(client => (
-                                            <option key={client._id} value={client.firstName} className="text-body dark:text-bodydark" >{client.firstName + " " + client.lastName}</option>
+                                        clients.length > 1 && clients?.map(client => (
+                                            <option key={client._id} value={client._id} className="text-body dark:text-bodydark" >{client.firstName + " " + client.lastName}</option>
                                         ))
                                     }
                             </select>
@@ -379,7 +400,7 @@ function Forms() {
                         <div className='heading-separator mb-7'>Floride Tests</div>
                         <div className="mb-6  flex-col gap-6 xl:grid xl: grid-cols-2">
                             <div className="mb-4.5 w-full ">
-                                <DatePicker inputName="FTD" labelName="Floride Test Date" getDatefn={getFTDate}/>
+                                <DatePicker inputName="FTD" labelName="Floride Test Date" getDatefn={getFTDate} clearWarning={clearWarning}/>
                             </div>
                             <div className="mb-4.5 w-full">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white"> Raw Floride Test</label>
@@ -391,14 +412,20 @@ function Forms() {
                                 <input placeholder="Enter Treated Floride results" {...register3("treatedFT")} className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text"/>
                                 {errors3?.treatedFT && <div className='text-rose-500'>{errors3?.treatedFT?.message}</div>}
                             </div>
-                            <div className="mb-4.5 w-full">
+                            <div className="mb-4.5 w-full relative">
                                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">Upload Floride Test Results</label>
-                                <UploadButton  className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent  rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 dark:border-form-strokedark" endpoint="imageUploader" 
-                                onClientUploadComplete={(res) => {setFTFile(res);alert("Upload Completed");
-                                    }} onUploadError={(error) => {
+                                <UploadButton className="block ut-allowed-content:float-right w-full border-[1.5px] border-stroke bg-transparent rounded p-1.5 text-sm text-slate-500 ut-button:mr-4 ut-button:py-2 ut-button:px-4 ut-button:rounded-full ut-button:border-0 ut-button:text-sm ut-button:font-semibold ut-button:bg-violet-50 ut-button:text-violet-700 hover:ut-button:bg-violet-100 dark:border-form-strokedark" endpoint="imageUploader" 
+                                    onClientUploadComplete={(res) => {setFTFile(res[0].url);alert("Upload Completed");}}
+                                    onUploadError={(error) => {
                                     alert(`ERROR! ${error.message}`);
                                     }}
-                                />                            
+                                /> 
+                                <span className={`absolute top-0 right-0  ${fTFile ? "block" : "hidden"}`}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#008000" className="size-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
+                       
+                                </span>                           
                             </div>
                         </div>
                         <div className='heading-separator'> Other Tests</div>

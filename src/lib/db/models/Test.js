@@ -13,10 +13,11 @@ const testSchema = new mongoose.Schema(
                 },
                 otherTest: [
                     {
-                        name: {type:String},
-                        value:{type:Number},
-                        file : {type:String},
-                        date: {type:Date}
+                        testId: {type:Number},
+                        testName: {type:String},
+                        testResult:{type:Number},
+                        testFileUrl : {type:String},
+                        testDate: {type:Date}
                     }
                 ],
             }

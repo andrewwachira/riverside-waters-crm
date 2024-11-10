@@ -1,6 +1,7 @@
 'use server'
 import db from "@/lib/db";
 import User from "@/lib/db/models/User";
+import Test from "@/lib/db/models/Test";
 import Client from "@/lib/db/models/Client";
 import bcryptjs from "bcryptjs";
 import { signIn,auth } from "@/auth";
@@ -184,6 +185,7 @@ export const saveFilterInfo = async ({clientID,clientName,preFilter,u3_ChangeDat
 }
 
 export const saveTestInfo = async (florideTest, otherTests,clientID,) => {
+    console.log(florideTest,otherTests,clientID);   
     try {
         const {user} = await auth();
         if(!user){
@@ -191,33 +193,26 @@ export const saveTestInfo = async (florideTest, otherTests,clientID,) => {
         }
         await db.connect();
         const client = await Client.findById(clientID);
-        const filterInfo =  new Test({
+        const testInfo =  new Test({
             clientId : clientID,
             testResults:
                 {
                     florideTest,
-                    otherTest: [
-                        {
-                            name: otherTests[0].testName,
-                            value:testResults,
-                            file: testFiles,
-                            date: testDate
-                        }
-                    ],
+                    otherTest:otherTests,
                 }
         });
-        await filterInfo.save();
+        await testInfo.save();
         const activity = new AdminActivity({
-            name:"CLIENT FILTER REGISTRATION",
+            name:"CLIENT TEST DOCUMENTATION",
             activity : {
                 admin: user.name,
                 adminId: user._id,
-                action: `Registered filters for ${client.firstName} ${client.lastName}`
+                action: `Saved Test results for ${client.firstName} ${client.lastName}`
             },
             date:Date.now()
         })
         await activity.save();
-        return {status:201,message:`this functionality is currently under development`}
+        return {status:201,message:`Test results for ${client.firstName} ${client.lastName} saved succesfully`}
         
     } catch (error) {
         return {status:500, message:error.message}
