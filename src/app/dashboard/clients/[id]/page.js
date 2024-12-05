@@ -49,6 +49,12 @@ async function Clients({params}) {
                   Contact&apos;s Cell
                 </h5>
               </div>
+
+              <div className=" p-2.5 border-b border-stroke">
+                <h5 className="text-sm font-medium uppercase xsm:text-base">
+                  Date of Installation
+                </h5>
+              </div>
             </div> 
             <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
               <div className="border-b border-stroke flex tems-center justify-center p-2.5">
@@ -69,6 +75,10 @@ async function Clients({params}) {
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
                 <p className="text-black dark:text-white">{client.contactPerson?.phoneNumber}</p>
+              </div>
+
+              <div className=" border-b border-stroke flex items-center justify-center p-2.5">
+                <p className="text-black dark:text-white">{(client.dateOfInstallation).toDateString()}</p>
               </div>
             </div>
           </div>
@@ -158,7 +168,7 @@ async function Clients({params}) {
                             <p className={`text-black`}>{testInfo[testInfo.length-1].testResults.florideTest.treated}</p>
                           </div>
                           <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                            <Link href={testInfo[testInfo.length-1].testResults.florideTest.file} target="_blank" className={`text-blue underline flex justify-bottom`}>
+                            <Link href={testInfo[testInfo.length-1].testResults.florideTest.file} target="_blank" className={`text-blue-600 underline flex justify-bottom`}>
                               <span>open</span>
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-5 ml-1">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -197,12 +207,14 @@ async function Clients({params}) {
                           <td className=" p-2.5 text-center border-b border-stroke">
                             {test.testResult}
                           </td>
-                          <Link href={test.testFileUrl} target='_blank' className="flex p-2.5 text-center underline border-b border-stroke">
-                              <span>open</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-5 ml-1">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                              </svg>
-                          </Link>
+                          <td  className=" border-b border-stroke flex items-center justify-center p-2.5">
+                            <Link href={test.testFileUrl} target='_blank' className="text-blue-600 underline flex justify-bottom">
+                                <span>open</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-5 ml-1">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                            </Link>
+                          </td>
                         </tbody>
                         ))}
                       </table>

@@ -219,12 +219,13 @@ export const saveTestInfo = async (florideTest, otherTests,clientID,) => {
     }
 }
 
-export const editClientData = async({clientId,firstName,lastName,phoneNumber,residence,contactName,contactCell})=> {
+export const editClientData = async({clientId,firstName,lastName,phoneNumber,residence,contactName,contactCell,doi})=> {
     try {
         const {user} = await auth();
         if(!user){
             return {message:"This operation is only possible if you are logged in as an admin",status:403};
         }
+        console.log(doi);
         await db.connect();
         const client = await Client.findById(clientId);
         await client.updateOne({
@@ -234,6 +235,7 @@ export const editClientData = async({clientId,firstName,lastName,phoneNumber,res
             residence:residence,
             "contactPerson.name":contactName,
             "contactPerson.phoneNumber":contactCell,
+            dateOfInstallation:doi
         })
         const activity = new AdminActivity({
             name:"CLIENT INFO UPDATE",

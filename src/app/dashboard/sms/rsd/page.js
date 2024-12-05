@@ -23,8 +23,15 @@ function RSD() {
             toast.error("Write down a message for the client selected");
         }
         else{
-            toast.success("Text message sent successfully");
-            // implement sending message
+            try {
+                const res= await fetch("/api/sms/rsd",{method:'POST',body:JSON.stringify({client:"254".concat(Number(client)),message})});
+                const data = await res.json();
+                toast.success(data.message);
+                setClient("");
+                setMessage("");
+            } catch (error) {
+                toast.error(error.message);
+            }
         }
     }
 

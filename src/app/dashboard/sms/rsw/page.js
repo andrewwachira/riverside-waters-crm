@@ -5,11 +5,13 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { getClients } from '@/actions/server';
 import toast from 'react-hot-toast';
 import Image from "next/image";
+import axios from "axios";
 
 function RSW() {
     const [clients,setClients]  = useState([]);
     const [clientsLoading,setClientsLoading]  = useState(false);
     const [selectedClients, setSelectedClients] = useState([]);
+    const [selectedClientsCell, setSelectedClientsCell] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
     const [dropOpen,setDropOpen] = useState(false);
     const [message,setMessage] = useState("");
@@ -25,22 +27,28 @@ function RSW() {
     },[])
 
     const handleSelectAllChange = () => {
-        setSelectAll(!selectAll);
+        setSelectAll((prev) => !prev);
         if (!selectAll) {
-          setSelectedClients(clients); // Select all options
+            const allClientsCell = clients.map(client => "254".concat(Number(client.phoneNumber)));
+            setSelectedClients(clients);
+            setSelectedClientsCell(allClientsCell);
         } else {
-          setSelectedClients([]); // Deselect all options
+            setSelectedClients([]);
+            setSelectedClientsCell([]);
         }
     };
+    
     const handleCheckboxChange = (client) => {
         setSelectedClients((prev) => {
-          if (prev.includes(client)) {
-            return prev.filter((item) => item._id !== client._id);
-          } else {
-            return [...prev, client];
-          }
+            const updatedClients = prev.some(c => c._id === client._id)
+                ? prev.filter((item) => item._id !== client._id)
+                : [...prev, client];
+            
+            // Update selectedClientsCell directly
+            setSelectedClientsCell(updatedClients.map(c => "254".concat(Number(c.phoneNumber))));
+            return updatedClients;
         });
-      };
+    };
     const sendSMS = async (e) => {
         e.preventDefault();
         if(selectedClients.length < 1){
@@ -49,8 +57,14 @@ function RSW() {
             toast.error("Write down a message for the client selected");
         }
         else{
-            toast.success("Text message sent successfully");
-            // implement sending message
+            try {
+                const {data}= await axios.post("/api/sms/rsw",{client:selectedClientsCell,message});
+                toast.success(data.message);
+                setClient("");
+                setMessage("");
+            } catch (error) {
+                toast.error(error.message);
+            }
         }
     }
     return (
@@ -62,13 +76,13 @@ function RSW() {
                     <div className="px-6.5">
                         <label className="mb-2.5 text-black dark:text-white"> Client </label>
                         {clientsLoading && <div className="p-3">Loading clients...</div> }
-                        <div className="relative z-20 bg-transparent dark:bg-form-input">
-                            <div className={`relative z-20 w-full appearance-none ${dropOpen ? "bg-transparent" : "bg-blue-900"} rounded border text-white border-stroke px-5 py-3 outline-none transition active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
+                        <div className="relative z-20  bg-transparent dark:bg-form-input">
+                            <div className={`relative max-h-[300px] overflow-y-auto z-20 w-full appearance-none ${dropOpen ? "bg-transparent" : "bg-blue-900"} rounded border text-white border-stroke px-5 py-3 outline-none transition active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
                                 <button type="button" className={`${dropOpen ? "text-body": "text-white"} list-type-none dark:text-bodydark w-full`} onClick={()=>setDropOpen(!dropOpen)}>Select Client</button>
                                 {dropOpen && (
                                     <div className="mt-3">
                                         <div className="border bg-slate-100 p-3">
-                                            <input
+                                            <input 
                                             type="checkbox"
                                             checked={selectAll}
                                             onChange={handleSelectAllChange}
@@ -81,7 +95,7 @@ function RSW() {
                                             <div key={client._id} className="border-b p-3">
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedClients.includes(client)}
+                                                    checked={selectedClients.some(c => c._id ===  client._id)}
                                                     onChange={() => handleCheckboxChange(client)}
                                                 />
                                                 <label className="ml-1 text-body dark:text-bodydark">{client.firstName + " " + client.lastName}</label>

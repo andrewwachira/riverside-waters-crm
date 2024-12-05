@@ -7,6 +7,7 @@ import { getClientData,editClientData } from '@/actions/server';
 import Error from '@/components/Modals/Error';
 import Success from '@/components/Modals/Success';
 import { useRouter } from 'next/navigation';
+import DatePicker from '@/components/FormElements/DatePicker/DatePicker'
 
 function EditClientInfo({params}) {
   const {register,formState:errors,handleSubmit,setValue} = useForm();
@@ -18,7 +19,8 @@ function EditClientInfo({params}) {
   const [successMessage,setSuccessMessage] = useState("");
   const [triggerEffect,setTriggerEffect] = useState(false);
   const router = useRouter();
-  
+  const [doi,setDoi] = useState(false);
+  const [doiErr,setDoiErr] = useState(false);
   useEffect(()=>{
     const getData = async()=>{
       setLoading(true);
@@ -31,6 +33,7 @@ function EditClientInfo({params}) {
         setValue("residence",res.client.residence);
         setValue("contactName",res.client.contactName);
         setValue("contactCell",res.client.contactCell);
+        setDoi(res.client.dateOfInstallation);
       }else{
         setFetchError(res.error);
       }
@@ -39,9 +42,13 @@ function EditClientInfo({params}) {
     getData();
 
   },[params.id,setValue,triggerEffect]);
-  
+
+   //DOI means Date of Installation. A date that could be in the future,present or past.
+  const getDOIDate= (date) => {
+    setDoi(date);
+  }
   const handleEditClient = async({firstName,lastName,phoneNumber,residence,contactName,contactCell}) => {
-    const res = await editClientData({clientId:params.id,firstName,lastName,phoneNumber,residence,contactName,contactCell});
+    const res = await editClientData({clientId:params.id,firstName,lastName,phoneNumber,residence,contactName,contactCell,doi});
     if(res.status == 200) {
       setTriggerEffect(true);
       setSuccessMessage("Client Update operation was successfull");
@@ -58,7 +65,7 @@ function EditClientInfo({params}) {
   const onSuccRequestClose = () => {
     setUpdateSuccess(false);
     setSuccessMessage("");
-    setTimeout(()=>router.push("/dashboard/clients"),1000);
+    setTimeout(()=>router.push(`/dashboard/clients/${params.id}`),1000);  
   }
   return (
     <DefaultLayout>
@@ -110,13 +117,16 @@ function EditClientInfo({params}) {
                     </div>
                     <div className="mb-4.5">
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">Contact Person Name</label>
-                        <input name="contactName" {...register("contactName",{required:"Contact Person Name is required"})}  placeholder="Enter Client's contact person" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactName && "border-danger"}`} type="text"/>
+                        <input name="contactName" {...register("contactName")}  placeholder="Enter Client's contact person" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactName && "border-danger"}`} type="text"/>
                         {errors.contactName && <div className='text-rose-500'>{errors?.contactName?.message}</div>}
                     </div>
                     <div className="mb-4.5">
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">Contact Person Phone Number</label>
-                        <input name="contactCell" {...register("contactCell",{required:{value: /^\d{10,10}$/,message:"Enter phone Number as per the format"}})}  placeholder="0720-123-123" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactCell && "border-danger"}`} type="tel"/>
+                        <input name="contactCell" {...register("contactCell")}  placeholder="0720-123-123" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.contactCell && "border-danger"}`} type="tel"/>
                         {errors.contactCell && <div className='text-rose-500'>{errors?.contactCell?.message}</div>}
+                    </div>
+                    <div className="mb-4.5">
+                            <div className="my-4.5"><DatePicker inputName="doi" prevData={doi}  getDatefn={getDOIDate} Err={doiErr} labelName="Date of Installation"/></div>   
                     </div>
                     <button type='submit' className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">Save Changes</button>
                 </div>
