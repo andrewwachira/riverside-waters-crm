@@ -20,12 +20,9 @@ export async function POST(req) {
                 ]
             },
         )
-        if(data.statusCode !== 200){
-            throw new Error(data.reason);
-        }else{
-            return res.json({message:"Text sent successfully"});
-        }
+        
+        return res.json({message:"Text sent successfully"});
     } catch (error) {
-        return res.json({message:error});
+        return res.json({message:error.message});
     }
 }
