@@ -14,7 +14,7 @@ import avatar from "../../../public/images/avatar.png";
 //   ssr: false,
 // });
 
-const DashboardUI = () => {
+const   DashboardUI = () => {
   const [colorMode, setColorMode] = useColorMode();
   const [loading,setLoading] = useState(false);
   const [error,setError] = useState(false);
@@ -31,7 +31,7 @@ const DashboardUI = () => {
       setDashData(data.payload);
     }
   }
-  const {isValidating} = useSWR("/api/dashboard",dashFetcher,{revalidateIfStale: true,revalidateOnReconnect:true,revalidateOnFocus:false});
+  const {isValidating} = useSWR("/api/dashboard",dashFetcher,{revalidateIfStale: true,revalidateOnReconnect:true,revalidateOnFocus:true});
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
