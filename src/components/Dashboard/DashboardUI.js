@@ -148,7 +148,7 @@ const   DashboardUI = () => {
               Filter changes Due {loading && <div className="cssLoader"></div> }
             </h4>
           { dashData?.filtersDue.length < 1 ?
-                <p className="mb-3">There are no filter change events due</p>
+              <p className="mb-3">There are no filter change events due</p>
               :
             <div className="flex flex-col">
               <div className="grid grid-cols-2 rounded-sm bg-gray-2 dark:bg-meta-4 md:grid-cols-4">

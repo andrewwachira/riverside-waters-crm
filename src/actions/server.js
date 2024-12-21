@@ -419,3 +419,60 @@ export const changeProfilePic = async(uploadedPic)=> {
         return {status:500,error:error.message}
     }
 }
+
+//dashboard/clients with pagination
+export const getClients2 = async (pageNum,limit) => {
+   
+    const skip = (pageNum - 1) * limit
+    try {
+        await db.connect();
+        const numClients =  await Client.countDocuments();
+       const result =  await Client.find({}).limit(Number(limit)).skip(Number(skip));
+       const serClients = [];
+       result.forEach(client => {
+            const serialized ={
+               _id: client._id.toString(),
+               createdAt: client.createdAt.toDateString(),
+               updatedAt: client.updatedAt.toDateString(),
+               firstName: client.firstName,
+               lastName: client.lastName,
+               phoneNumber: client.phoneNumber,
+               residence: client.residence,
+               contactName: client.contactPerson.name,
+               contactCell: client.contactPerson.phoneNumber,
+           }
+        serClients.push(serialized)
+        }
+        )
+        return {clients : serClients, numClients}
+    } catch (error) {
+        return error
+    }
+}
+export const searchClient = async (firstName) => {
+    
+    try {
+        await db.connect();
+        const numClients =  await Client.countDocuments();
+        const result =  await Client.find({firstName:{ $regex: firstName.trim(), $options: "i" }});
+       const serClients = [];
+       result.forEach(client => {
+            const serialized ={
+               _id: client._id.toString(),
+               createdAt: client.createdAt.toDateString(),
+               updatedAt: client.updatedAt.toDateString(),
+               firstName: client.firstName,
+               lastName: client.lastName,
+               phoneNumber: client.phoneNumber,
+               residence: client.residence,
+               contactName: client.contactPerson.name,
+               contactCell: client.contactPerson.phoneNumber,
+           }
+        serClients.push(serialized)
+        })
+        console.log(result,serClients);
+        return {searchResults : serClients, numClients}
+    } catch (error) {
+        return error
+    }
+}
