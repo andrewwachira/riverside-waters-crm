@@ -10,7 +10,8 @@ const clientSchema = new mongoose.Schema(
             name: {type:String},
             phoneNumber:{type:String}
         },
-        dateOfInstallation : {type:Date, required:true}
+        dateOfInstallation : {type:Date, required:true},
+        isActive : {type:Boolean,default:true}
     },
     {
         timestamps:true

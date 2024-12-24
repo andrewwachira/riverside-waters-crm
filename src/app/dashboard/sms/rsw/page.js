@@ -60,7 +60,7 @@ function RSW() {
             try {
                 const {data}= await axios.post("/api/sms/rsw",{client:selectedClientsCell,message});
                 toast.success(data.message);
-                setClient("");
+                setSelectedClients([]);
                 setMessage("");
             } catch (error) {
                 toast.error(error.message);

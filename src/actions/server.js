@@ -420,7 +420,7 @@ export const changeProfilePic = async(uploadedPic)=> {
     }
 }
 
-//dashboard/clients with pagination
+//dashboard/clients (with pagination)
 export const getClients2 = async (pageNum,limit) => {
    
     const skip = (pageNum - 1) * limit
@@ -449,6 +449,7 @@ export const getClients2 = async (pageNum,limit) => {
         return error
     }
 }
+// /dashboard/clients
 export const searchClient = async (firstName) => {
     
     try {
@@ -473,6 +474,20 @@ export const searchClient = async (firstName) => {
         console.log(result,serClients);
         return {searchResults : serClients, numClients}
     } catch (error) {
+        return error
+    }
+}
+// /dashboard/clients/id/
+export const getClientData = async(clientId)=> {
+
+    try {
+        const [client,filterInfo,testInfo] = await Promise.all([Client.findById(clientId), Filter.find({clientId}),Test.find({clientId})]);
+        console.log("Client:", client);
+        console.log("FilterInfo:", filterInfo);
+        console.log("TestInfo:", testInfo);
+        return {client,filterInfo,testInfo}
+    } catch (error) {
+        console.log(error);
         return error
     }
 }

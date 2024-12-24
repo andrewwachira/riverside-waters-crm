@@ -58,31 +58,31 @@ async function Clients({params}) {
             </div> 
             <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
               <div className="border-b border-stroke flex tems-center justify-center p-2.5">
-                <p className=" text-black dark:text-white sm:block">{client.firstName + " " + client.lastName}</p>
+                <p className=" text-black dark:text-white sm:block">{client?.firstName + " " + client?.lastName}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                <p className="text-black dark:text-white">{client.phoneNumber}</p>
+                <p className="text-black dark:text-white">{client?.phoneNumber}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                <p className="text-black dark:text-white">{client.residence}</p>
+                <p className="text-black dark:text-white">{client?.residence}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                <p className="text-black dark:text-white">{client.contactPerson?.name}</p>
+                <p className="text-black dark:text-white">{client?.contactPerson?.name}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                <p className="text-black dark:text-white">{client.contactPerson?.phoneNumber}</p>
+                <p className="text-black dark:text-white">{client?.contactPerson?.phoneNumber}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                <p className="text-black dark:text-white">{(client.dateOfInstallation).toDateString()}</p>
+                <p className="text-black dark:text-white">{(client?.dateOfInstallation)?.toDateString()}</p>
               </div>
             </div>
           </div>
-          <Link href={`/dashboard/clients/${client._id}/edit-client-info`} className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Client Details</Link>
+          <Link href={`/dashboard/clients/${client?._id}/edit-client-info`} className="flex w-full justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Edit Client Details</Link>
 
         </div>
         <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 mb-7 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
@@ -227,7 +227,7 @@ async function Clients({params}) {
               }
         </div >
 
-        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
+        <div className="rounded-sm border border-stroke bg-white px-5 mb-7 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Change History</h4>
               <div className='flex w-full mb-6'>
                 <div className="grid grid-row-3 rounded-sm bg-gray-2 dark:bg-meta-4 w-full">
@@ -242,10 +242,10 @@ async function Clients({params}) {
                     </div>
                 </div>
                 {
-                  filterInfo.map(filter => (
+                  filterInfo?.map(filter => (
                     <div key={filter._id} className="grid grid-row-3 rounded-sm bg-white dark:bg-meta-4 w-full">
                         <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                          <p className={`text-black`}>{filter.updatedAt.toDateString()}</p>
+                          <p className={`text-black`}>{filter.updatedAt?.toDateString()}</p>
                         </div>
                         <div className=" border-b border-stroke flex items-center justify-center p-2.5">
                           <p className={`text-black`}>{filter.changeCycle}</p>
@@ -257,6 +257,31 @@ async function Clients({params}) {
                   ) )
                 }
             </div>
+        </div>
+
+        <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
+          <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Account Status and Deletion</h4>
+          <div className="grid grid-row-1 bg-gray-2 dark:bg-meta-4 w-full">
+            <div className="p-2.5 ">
+                <h5 className="text-sm font-medium uppercase xsm:text-base">Account Status</h5>
+            </div>
+          </div>
+          <div className="grid grid-row-1 rounded-sm border border-stroke mb-5 bg-white dark:bg-meta-4 w-full">
+            <div className=" flex justify-between items-center p-2.5 border-b border-stroke ">
+                <h5 className="text-sm font-medium uppercase xsm:text-base">{client.isActive ? <span className='text-green-500'>Active</span> : <span className='text-orange-600'>Inactive</span>}</h5>
+                <Link href={`/dashboard/clients/${client._id}/account-management/status?set=${!client.isActive}`} className="flex justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Change status to {client.isActive ? "Inactive" : "Active"}</Link>
+            </div>
+          </div>
+          <div className="grid grid-row-1 bg-danger border-stroke dark:bg-meta-4 w-full">
+            <div className="p-2.5 ">
+                <h5 className="text-sm font-medium   uppercase text-white xsm:text-base">Account Deletion </h5>
+            </div>
+          </div>
+          <div className="grid grid-row-1 border border-stroke mb-7 rounded-sm dark:bg-meta-4 w-full">
+            <div className=" flex justify-center items-center p-2.5 border-b border-stroke ">
+                <Link href={`/dashboard/clients/${client._id}/account-management/delete`} className="flex justify-center rounded bg-danger p-3 my-5 font-medium text-white hover:bg-opacity-90">Permanently delete {client.firstName} {client.lastName}&apos;s account</Link>
+            </div>
+          </div>
         </div>
     </div>
     <div className='h-[50vh]'></div>

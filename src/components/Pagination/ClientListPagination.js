@@ -3,10 +3,10 @@ import {useState} from 'react'
 import Link from 'next/link';
 
 function ClientList({setPage,setLimit,page,limit,numClients}) {
-    const [currentPage,setCurrentPage]=  useState(page);
     const [disablePrev,setDisablePrev] = useState(false);
     const [disableNext,setDisableNext] = useState(false);
     const lastPage = Math.ceil(numClients / limit);
+    
     function handlePrev(){
         if(page <= 1){
             setDisablePrev(true);
