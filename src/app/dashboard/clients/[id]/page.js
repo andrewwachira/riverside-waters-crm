@@ -261,27 +261,22 @@ async function Clients({params}) {
 
         <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Account Status and Deletion</h4>
-          <div className="grid grid-row-1 bg-gray-2 dark:bg-meta-4 w-full">
-            <div className="p-2.5 ">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">Account Status</h5>
+          <div className='flex w-full mb-6'>
+            <div className="grid grid-row-1 bg-gray-2 dark:bg-meta-4 w-full">
+              <div className="p-2.5 border-b border-stroke ">
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">Account Status</h5>
+              </div>
+            </div>
+            <div className="grid grid-row-1 bg-white dark:bg-meta-4 w-full">
+              <div className=" flex items-center justify-center p-2.5 border-b border-stroke ">
+                  <h5 className="text-sm font-medium uppercase xsm:text-base">{client.isActive ? <span className='text-green-500'>Active</span> : <span className='text-orange-600'>Inactive</span>}</h5>
+              </div>
             </div>
           </div>
-          <div className="grid grid-row-1 rounded-sm border border-stroke mb-5 bg-white dark:bg-meta-4 w-full">
-            <div className=" flex justify-between items-center p-2.5 border-b border-stroke ">
-                <h5 className="text-sm font-medium uppercase xsm:text-base">{client.isActive ? <span className='text-green-500'>Active</span> : <span className='text-orange-600'>Inactive</span>}</h5>
-                <Link href={`/dashboard/clients/${client._id}/account-management/status?set=${!client.isActive}`} className="flex justify-center rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Change status to {client.isActive ? "Inactive" : "Active"}</Link>
-            </div>
-          </div>
-          <div className="grid grid-row-1 bg-danger border-stroke dark:bg-meta-4 w-full">
-            <div className="p-2.5 ">
-                <h5 className="text-sm font-medium   uppercase text-white xsm:text-base">Account Deletion </h5>
-            </div>
-          </div>
-          <div className="grid grid-row-1 border border-stroke mb-7 rounded-sm dark:bg-meta-4 w-full">
-            <div className=" flex justify-center items-center p-2.5 border-b border-stroke ">
-                <Link href={`/dashboard/clients/${client._id}/account-management/delete`} className="flex justify-center rounded bg-danger p-3 my-5 font-medium text-white hover:bg-opacity-90">Permanently delete {client.firstName} {client.lastName}&apos;s account</Link>
-            </div>
-          </div>
+          <Link href={`/dashboard/clients/${client._id}/account-management/status?set=${!client.isActive}&client=${client.firstName} ${client.lastName}`} className="flex justify-center w-full rounded bg-primary p-3 my-5 font-medium text-white hover:bg-opacity-90">Change status to {client.isActive ? "Inactive" : "Active"}</Link>
+          <div className='heading-separator'> Account deletion</div>
+          <Link href={`/dashboard/clients/${client._id}/account-management/delete?client=${client.firstName} ${client.lastName}`} className="flex justify-center rounded bg-danger p-3 my-5 font-medium text-white hover:bg-opacity-90">Permanently delete {client.firstName} {client.lastName}&apos;s account</Link>
+         
         </div>
     </div>
     <div className='h-[50vh]'></div>

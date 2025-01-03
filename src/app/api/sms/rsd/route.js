@@ -9,7 +9,7 @@ export async function POST(req) {
                 userid : "andrewwachira1",
                 password : "Exclamation1!",
                 senderid : "RIVERSIDE",
-                msgType : "text",
+                msgType : "unicode",
                 duplicatecheck : "true",
                 sendMethod : "quick",
                 sms: [

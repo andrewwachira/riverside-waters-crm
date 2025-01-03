@@ -446,7 +446,7 @@ export const getClients2 = async (pageNum,limit) => {
         )
         return {clients : serClients, numClients}
     } catch (error) {
-        return error
+        return error.message
     }
 }
 // /dashboard/clients
@@ -474,7 +474,7 @@ export const searchClient = async (firstName) => {
         console.log(result,serClients);
         return {searchResults : serClients, numClients}
     } catch (error) {
-        return error
+        return error.message
     }
 }
 // /dashboard/clients/id/
@@ -482,12 +482,49 @@ export const getClientData = async(clientId)=> {
 
     try {
         const [client,filterInfo,testInfo] = await Promise.all([Client.findById(clientId), Filter.find({clientId}),Test.find({clientId})]);
-        console.log("Client:", client);
-        console.log("FilterInfo:", filterInfo);
-        console.log("TestInfo:", testInfo);
         return {client,filterInfo,testInfo}
     } catch (error) {
-        console.log(error);
-        return error
+        return {status:500,error:error.message}
+    }
+}
+
+export const changeClientStatus = async(clientId,setStatus)=> {
+    const {user} = await auth();
+    try {
+        const client = await Client.findById(clientId);
+        await Client.updateOne({_id: clientId},{isActive:setStatus});
+        const activity = new AdminActivity({
+            name:"CHANGE CLIENT STATUS",
+            activity : {
+                admin: user.name,
+                adminId: user._id,
+                action: `Changed status for ${client.firstName} ${client.lastName} to ${setStatus}`
+            },
+            date:Date.now()
+        })
+        await activity.save();
+        return{status:200,message:`Status Change Operation was successfull. Account status is ${client.isActive ? "Active" : "Inactive"}`};
+    } catch (error) {
+        return {status:500,error:error.message}
+    }
+}
+
+export const deleteClient = async(clientId,clientName)=> {
+    const {user} = await auth();
+    try {
+        await Client.findByIdAndDelete(clientId);
+        const activity = new AdminActivity({
+            name:"DELETE CLIENT",
+            activity : {
+                admin: user.name,
+                adminId: user._id,
+                action: `Deleted account for ${clientName}`
+            },
+            date:Date.now()
+        })
+        await activity.save();
+        return{status:200,message:`Permanently deleted ${clientName}'s account.`};
+    } catch (error) {
+        return {status:500,error:error.message}
     }
 }
