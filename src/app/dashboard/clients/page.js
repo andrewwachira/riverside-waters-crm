@@ -3,8 +3,10 @@ import {useEffect,useState} from 'react';
 import DefaultLayout from '@/components/Layouts/DefaultLayout'
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb'
 import Link from 'next/link';
-import { getClients2,searchClient} from '@/actions/server';
+import { getClients2,getClients3,searchClient} from '@/actions/server';
 import ClientList from '@/components/Pagination/ClientListPagination';
+import ClientsTableHeader from '@/components/Tables/ClientsTableHeader';
+import FilterByYear from '@/components/Layouts/FilterByYear';
 
 function Clients() {
   const [loading,setLoading] = useState(false);
@@ -17,30 +19,39 @@ function Clients() {
   const [limit,setLimit] = useState(25);
   const [showOptions,setShowOptions] = useState(false);
   const [filterType,setFilterType] = useState(null);
+  const [year,setYear] = useState(new Date().getFullYear());
+  const [fbyClients,setFbyClients] = useState([]);
 
   useEffect(()=>{
-    if(!filterType){
-    async function getClientList() {
-      setLoading(true)
-      const {clients,numClients} = await getClients2(Number(page),Number(limit));
-      if(clients?.length > 0 && numClients)setLoading(false);
-      setClients(clients);
-      setNumClients(numClients);
-   }
-   getClientList();
-   }else{
-    async function getfilteredClientList () {
-      setLoading(true);
-      const {clients,numClients} = await filteredClients(filterType);
+    if(!filterType || filterType === "none"){
+      async function getClientList() {
+        setLoading(true)
+        const {clients,numClients} = await getClients2(Number(page),Number(limit));
+        if(clients?.length > 0 && numClients)setLoading(false);
+        setClients(clients);
+        setNumClients(numClients);
+      }
+    getClientList();
     }
-   // getfilteredClientList()
+    if(filterType === "year"){
+      async function filterByYear() {
+        setLoading(true);
+        const {clients} = await getClients3(Number(year));
+        if(clients?.length > 0 ){
+          setLoading(false);
+          setFbyClients(clients);
+        }
+        else{
+          setLoading(false);setFbyClients([]);
+        } 
+      }
+      filterByYear();
    }
-  },[limit, page,filterType])
+  },[limit, page,filterType,year])
 
   const searchFunc = async(text) => {
       setLoading(true);
       const {searchResults} = await searchClient(text.charAt(0).toUpperCase() + text.slice(1),);
-      console.log(searchResults);
       if(searchResults.length > 0){
         setError(false);
         setLoading(false);
@@ -82,12 +93,11 @@ function Clients() {
             <select onChange={(e)=>setFilterType(e.target.value)}className={showOptions ? "block" : "hidden"}>
               <option value="" className="border bg-slate-100 p-3">Filter by...</option>
               <option value="year" className="border bg-slate-100 p-3">Filter by Year</option>
+              <option value="none" className="border bg-slate-100 p-3">No Filter</option>
             </select>
           </div>
           
       </div>
-      
-      
 
       <div className='grid lg:grid-cols-2 justify-between items-center'>
         <form className='flex  items-center h-16'>
@@ -100,10 +110,26 @@ function Clients() {
           <button type='button' onClick={()=> searchTxt && searchFunc(searchTxt)} className='flex w-fit justify-center rounded-md bg-primary p-3 mx-1 h-12 my-7 font-medium text-gray hover:bg-opacity-90'>Search</button>
           { search && <button type='button' onClick={()=> window.location.reload()} className='flex w-fit justify-center rounded-md bg-rose-600 p-3 mx-1 h-12 my-7 font-medium text-gray hover:bg-opacity-90'>Clear</button>}
         </form>
-        {!search && <ClientList setPage={setPage} setLimit={setLimit} page = {page} limit = {limit} numClients={numClients}/>}
+        {filterType === "year" ?
+          <div className="flex mb-2 justify-end">
+            <button className="mr-4 flex items-center border-b" onClick={()=>setYear(prevState => --prevState)}> 
+              <svg className="rotate-90 scale-110 hidden fill-current sm:block" width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" clipRule="evenodd" d="M0.410765 0.910734C0.736202 0.585297 1.26384 0.585297 1.58928 0.910734L6.00002 5.32148L10.4108 0.910734C10.7362 0.585297 11.2638 0.585297 11.5893 0.910734C11.9147 1.23617 11.9147 1.76381 11.5893 2.08924L6.58928 7.08924C6.26384 7.41468 5.7362 7.41468 5.41077 7.08924L0.410765 2.08924C0.0853277 1.76381 0.0853277 1.23617 0.410765 0.910734Z" fill="" />
+              </svg>
+              {year -1}
+            </button>
+            <button className="ml-0 flex items-center border-b" onClick={()=>setYear(prevState => ++prevState)}> {year +1}
+              <svg className=" -rotate-90 scale-110 hidden fill-current sm:block" width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" clipRule="evenodd" d="M0.410765 0.910734C0.736202 0.585297 1.26384 0.585297 1.58928 0.910734L6.00002 5.32148L10.4108 0.910734C10.7362 0.585297 11.2638 0.585297 11.5893 0.910734C11.9147 1.23617 11.9147 1.76381 11.5893 2.08924L6.58928 7.08924C6.26384 7.41468 5.7362 7.41468 5.41077 7.08924L0.410765 2.08924C0.0853277 1.76381 0.0853277 1.23617 0.410765 0.910734Z" fill="" />
+              </svg>
+            </button>
+          </div>
+        :
+         !search && <ClientList setPage={setPage} setLimit={setLimit} page = {page} limit = {limit} numClients={numClients}/>
+         }
       </div>
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-        <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
+      <div className={`rounded-sm border border-stroke bg-white ${filterType === "year" ? "p-0 shadow-default dark:border-strokedark dark:bg-boxdark" :  "px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1"}`}>
+        <h4 className={`${filterType === "year" ? "hidden" : "mb-6 text-xl font-semibold text-black dark:text-white"}`}>
           All Clients
         </h4>
 
@@ -120,36 +146,11 @@ function Clients() {
           <p className='p-5 text-center text-lg text-rose-700'>There are no clients registered yet.</p>
         </div>
         :
+        !search && filterType === "year" ?
+        <FilterByYear clients={fbyClients} year={year} />
+        :
         <div className="flex flex-col">
-          <div className="grid grid-cols-3 rounded-sm bg-gray-2 dark:bg-meta-4 md:grid-cols-5">
-            <div className="p-2.5 xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                Name
-              </h5>
-            </div>
-            <div className="p-2.5 text-center xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                Phone number
-              </h5>
-            </div>
-            <div className="hidden p-2.5 text-center xl:p-5 md:block">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                Residence
-              </h5>
-            </div>
-            <div className="hidden p-2.5 text-center md:block  xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                Contact Person
-              </h5>
-            </div>
-          
-            <div className="p-2.5 text-center xl:p-5">
-              <h5 className="text-sm font-medium uppercase xsm:text-base">
-                Action
-              </h5>
-            </div>
-          </div>
-
+          <ClientsTableHeader/>
           {clients.map((client, key) => (
             <div className={`grid grid-cols-3 sm:grid-cols-5 ${ key === clients.length - 1 ? "" : "border-b border-stroke dark:border-strokedark" }`} key={key}>
               <div className="flex items-center gap-3 p-2.5 xl:p-5">

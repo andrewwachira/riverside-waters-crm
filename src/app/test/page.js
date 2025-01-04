@@ -1,9 +1,13 @@
 import React from 'react'
-import ClientListPagination from '@/components/Pagination/ClientListPagination'
-function Page() {
+import FilterByYear from '@/components/Layouts/FilterByYear'
+import { getClients3 } from '@/actions/server';
+
+async function Page() {
+
+  const {clients,year} = await getClients3(2022);
   return (
     <div>
-        <ClientListPagination/>
+        <FilterByYear clients={clients} year={year}/>
     </div>
   )
 }

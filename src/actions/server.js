@@ -449,6 +449,39 @@ export const getClients2 = async (pageNum,limit) => {
         return error.message
     }
 }
+//dashboard/clients (with pagination by year)
+export const getClients3 = async (year) => {
+
+    try {
+        await db.connect();
+       const result =  await Client.find({
+         dateOfInstallation: {
+           $gte: new Date(`${year}-01-01T00:00:00Z`),
+           $lt: new Date(`${year + 1}-01-01T00:00:00Z`)
+         }
+       });
+       const serClients = [];
+       result.forEach(client => {
+            const serialized ={
+               _id: client._id.toString(),
+               createdAt: client.createdAt.toDateString(),
+               updatedAt: client.updatedAt.toDateString(),
+               firstName: client.firstName,
+               lastName: client.lastName,
+               phoneNumber: client.phoneNumber,
+               residence: client.residence,
+               contactName: client.contactPerson.name,
+               contactCell: client.contactPerson.phoneNumber,
+               dateOfInstallation: client.dateOfInstallation.toDateString()
+           }
+        serClients.push(serialized)
+        }
+        )
+        return {clients : serClients, year}
+    } catch (error) {
+        return error.message
+    }
+}
 // /dashboard/clients
 export const searchClient = async (firstName) => {
     
