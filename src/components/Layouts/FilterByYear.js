@@ -15,8 +15,10 @@ function FilterByYear({clients,year}) {
 
     <div>
         <div className='flex flex-col'>
-            <h1 className='text-5xl p-2 text-center'>{year}</h1>
-            <span className='text-center text-sm mb-3'>{clients.length} clients registered in total</span>
+            <div className='flex bg-orange-400 text-white justify-between p-5 items-end'>
+                <h1 className='text-5xl p-2 text-center'>Year {year}</h1>
+                <span className='text-center text-sm mb-3'>{clients.length} clients registered in total</span>
+            </div>
             {clientsByMonth.map((clientsInMonth, index) => (
                 <div key={index} className='mb-7' >
                     <div className='flex-col items-center flex bg-blue-600 text-white p-3'>

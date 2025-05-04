@@ -9,7 +9,7 @@ const DatePicker = ({labelName,inputName,getDatefn,Err,clearWarning,prevData,get
     if (inputRef.current) {
       flatpickr(inputRef.current, {
         mode: "single",
-        static: true,
+        static: false,
         monthSelectorType: "static",
         dateFormat: "M j, Y",
         prevArrow:

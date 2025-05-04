@@ -85,7 +85,7 @@ export const sendResetLink = async (email) => {
     
 }
 
-export const createClientForm1 = async (firstName,lastName,phoneNumber,residence,contactName,contactCell,dateOfInstallation) => {
+export const createClientForm = async (firstName,lastName,phoneNumber,residence,contactName,contactCell,dateOfInstallation) => {
     try {
         const {user} = await auth();
         if(!user){
@@ -138,6 +138,7 @@ export const getClients = async () => {
                 residence: client.residence,
                 contactName: client.contactPerson.name,
                 contactCell: client.contactPerson.phoneNumber,
+                dateOfInstallation: client.dateOfInstallation.toDateString()
             }
             serClients.push(serialized);
         })
@@ -148,22 +149,22 @@ export const getClients = async () => {
     }
 }
 
-export const saveFilterInfo = async ({clientID,clientName,preFilter,u3_ChangeDate,pc_ChangeDate,ro_ChangeDate,rc_ChangeDate,changeCycle,adminComments}) => {
+export const saveFilterInfo = async ({clientId,clientName,u3,pc,ro,rc,changeCycle,changeCycleIndex,adminComments}) => {
     try {
         const {user} = await auth();
         if(!user){
             return {message:"This operation is only possible if you are logged in as an admin",status:403};
         }
         await db.connect();
-        const client = await Client.findById(clientID);
+        const client = await Client.findById(clientId);
         const filterInfo =  new Filter({
-            clientId : clientID,
-            preFilter,
-            u3_ChangeDate: moment(client.dateOfInstallation).add(u3_ChangeDate,"M"),
-            ro_ChangeDate : moment(client.dateOfInstallation).add(ro_ChangeDate,"M"),
-            pc_ChangeDate :  moment(client.dateOfInstallation).add(pc_ChangeDate,"M"),
-            rc_ChangeDate: moment(client.dateOfInstallation).add(rc_ChangeDate,"M"),
+            clientId,
+            u3_ChangeDate: u3,
+            ro_ChangeDate : ro,
+            pc_ChangeDate : pc,
+            rc_ChangeDate : rc,
             changeCycle,
+            changeCycleIndex,
             adminId : user._id,
             comments: adminComments,
         });
@@ -180,7 +181,23 @@ export const saveFilterInfo = async ({clientID,clientName,preFilter,u3_ChangeDat
         await activity.save();
         return {status:201,message:`Filter information for ${clientName} saved successfully`}
     } catch (error) {
+        console.log(error.message);
         return {status:500, message:error.message}
+    }
+}
+
+export const getFilterData = async (id) => {
+    try {
+        const {user} = await auth();
+        if(!user){
+            return {message:"This operation is only possible if you are logged in as an admin",status:403};
+        }
+        await db.connect();
+        const filterData = await Filter.find({clientId:id});
+        return {data:filterData}
+       
+    } catch (error) {
+        return {status:500, message:error}
     }
 }
 

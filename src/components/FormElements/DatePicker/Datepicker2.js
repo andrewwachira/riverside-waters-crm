@@ -29,7 +29,7 @@ const DatePicker2 = ({labelName,inputName,getDatefn,Err,clearWarning,prevData}) 
                 <span>18 months </span>
             </div>
             <div className="mx-2 text-sm p-3">
-                <input ref={inputRef} id={inputName} type="radio" onChange={()=>getDatefn(24)} defaultValue={prevData === false ? undefined : prevData} name={inputName} className={`w-full rounded border-[1.5px] border-stroke bg-transparent p-5 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${Err && "border-rose-500"}`} />
+                <input ref={inputRef} id={inputName} type="radio" onChange={()=>getDatefn(24,inputName)} defaultValue={prevData === false ? undefined : prevData} name={inputName} className={`w-full rounded border-[1.5px] border-stroke bg-transparent p-5 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${Err && "border-rose-500"}`} />
                 <span>24 months </span>
             </div>
         </div>
