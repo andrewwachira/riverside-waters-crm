@@ -236,7 +236,7 @@ export const saveTestInfo = async (florideTest, otherTests,clientID,) => {
     }
 }
 
-export const editClientData = async({clientId,firstName,lastName,phoneNumber,residence,contactName,contactCell,doi})=> {
+export const editClientData = async({clientId,firstName,lastName,phoneNumber,county,residence,contactName,contactCell,doi})=> {
     try {
         const {user} = await auth();
         if(!user){
@@ -249,6 +249,7 @@ export const editClientData = async({clientId,firstName,lastName,phoneNumber,res
             firstName:firstName,
             lastName:lastName,
             phoneNumber:phoneNumber,
+            county:county,
             residence:residence,
             "contactPerson.name":contactName,
             "contactPerson.phoneNumber":contactCell,

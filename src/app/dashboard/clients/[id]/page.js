@@ -35,6 +35,11 @@ async function Clients({params}) {
               </div>
               <div className="p-2.5 border-b border-stroke">
                 <h5 className="text-sm font-medium uppercase xsm:text-base">
+                  County
+                </h5>
+              </div>
+              <div className="p-2.5 border-b border-stroke">
+                <h5 className="text-sm font-medium uppercase xsm:text-base">
                   Residence
                 </h5>
               </div>
@@ -56,13 +61,17 @@ async function Clients({params}) {
                 </h5>
               </div>
             </div> 
-            <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
+            <div className={`grid grid-rows-6 dark:border-strokedark w-full`} >
               <div className="border-b border-stroke flex tems-center justify-center p-2.5">
                 <p className=" text-black dark:text-white sm:block">{client?.firstName + " " + client?.lastName}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
                 <p className="text-black dark:text-white">{client?.phoneNumber}</p>
+              </div>
+
+              <div className=" border-b border-stroke flex items-center justify-center p-2.5">
+                <p className="text-black dark:text-white">{client?.county}</p>
               </div>
 
               <div className=" border-b border-stroke flex items-center justify-center p-2.5">
@@ -97,9 +106,6 @@ async function Clients({params}) {
          
           <div className="flex w-full">
               <div className="grid grid-row-5 rounded-sm bg-gray-2 dark:bg-meta-4 w-full">
-                <div className="p-2.5 border-b border-stroke ">
-                  <h5 className="text-sm font-medium uppercase xsm:text-base">Sediment Filter present</h5>
-                </div>
                 <div className="p-2.5 border-b border-stroke">
                   <h5 className="text-sm font-medium uppercase xsm:text-base">Ultra 3 Change Date</h5>
                 </div>
@@ -114,10 +120,8 @@ async function Clients({params}) {
                 </div>
               </div> 
 
-              <div className={`grid grid-rows-5 dark:border-strokedark w-full`} >
-                <div className="border-b border-stroke flex tems-center justify-center p-2.5">
-                  <p className={`text-black sm:block`}>{filterInfo[filterInfo.length-1]?.sedimentFilter ? "Yes" : "No"}</p>
-                </div>
+              <div className={`grid grid-rows-4 dark:border-strokedark w-full`} >
+
                 <div className=" border-b border-stroke flex items-center justify-center p-2.5">
                   <p className={`text-black ${getDateDiff(filterInfo[filterInfo.length-1]?.u3_ChangeDate) < 7 ? "text-rose-600" : getDateDiff(filterInfo[filterInfo.length-1]?.u3_ChangeDate) < 21 ? "text-orange-500" : "text-meta-3"}`}>{(filterInfo[filterInfo.length-1]?.u3_ChangeDate)?.toDateString()}</p>
                 </div>
@@ -168,8 +172,8 @@ async function Clients({params}) {
                             <p className={`text-black`}>{testInfo[testInfo.length-1].testResults.florideTest.treated}</p>
                           </div>
                           <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                            <Link href={testInfo[testInfo.length-1].testResults.florideTest.file} target="_blank" className={`text-blue-600 underline flex justify-bottom`}>
-                              <span>open</span>
+                            <Link href={testInfo[testInfo.length-1].testResults.florideTest.file ? testInfo[testInfo.length-1].testResults.florideTest.file : "#"} target="_blank" className={`flex ${testInfo[testInfo.length-1].testResults.florideTest.file ? "text-blue-600 underline flex justify-bottom" : "text-rose-500 cursor-not-allowed"}`}>
+                              <span>{testInfo[testInfo.length-1].testResults.florideTest.file ? "open" : "No File uploaded"}</span>
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-5 ml-1">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                               </svg>
@@ -178,7 +182,7 @@ async function Clients({params}) {
                       </div>
                   </div>
 
-                  {testInfo[testInfo.length-1].testResults?.otherTest &&
+                  {testInfo[testInfo.length-1].testResults?.otherTest.length > 0 &&
                     <>
                       <h4 className="mb-2  font-semibold text-black dark:text-white">Other Test Information</h4>
                       <table className='flex mb-6 w-full'>
@@ -199,17 +203,17 @@ async function Clients({params}) {
                         {testInfo[testInfo.length-1].testResults.otherTest.map( test => (
                         <tbody key={test._id}   className="grid grid-rows-4 rounded-sm bg-white dark:bg-meta-4 w-full">
                           <td className=" p-2.5 text-center border-b border-stroke">
-                            {test.testDate.toDateString()}
+                            {test?.testDate.toDateString()}
                           </td>
                           <td className=" p-2.5 text-center border-b border-stroke">
-                            {test.testName}
+                            {test?.testName}
                           </td>
                           <td className=" p-2.5 text-center border-b border-stroke">
-                            {test.testResult}
+                            {test?.testResult}
                           </td>
                           <td  className=" border-b border-stroke flex items-center justify-center p-2.5">
-                            <Link href={test.testFileUrl} target='_blank' className="text-blue-600 underline flex justify-bottom">
-                                <span>open</span>
+                            <Link href={test?.testFileUrl ? test?.testFileUrl : "#"} target='_blank' className={`flex ${ test?.testFileUrl ? "text-blue-600 underline flex justify-bottom" : "text-rose-500 cursor-not-allowed"}`}>
+                                <span>{test?.testFileUrl ? "open" : "No File uploaded"}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-5 ml-1">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                                 </svg>
@@ -257,6 +261,7 @@ async function Clients({params}) {
                   ) )
                 }
             </div>
+            <Link href={`/dashboard/clients/${client._id}/filterHistory`} className="flex w-full justify-center rounded bg-orange-500 p-3 my-5 font-medium text-white hover:bg-opacity-90">View Filter History</Link>
         </div>
 
         <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">

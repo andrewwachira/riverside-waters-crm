@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 function ClientRegistrationForm() {
 
-    const [colorMode, setColorMode] = useColorMode();
+    const [colorMode] = useColorMode();
     const {register,handleSubmit,formState:{errors},reset} = useForm();
     const [clientFormOpen,setClientFormOpen] = useState(false); 
     const [doiErr,setDoiErr] = useState(null);

@@ -3,7 +3,7 @@ import React, { useEffect,useState } from 'react'
 import DefaultLayout from '@/components/Layouts/DefaultLayout'
 import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb'
 import { useForm } from 'react-hook-form'
-import { getClientData,editClientData } from '@/actions/server';
+import { editClientData } from '@/actions/server';
 import Error from '@/components/Modals/Error';
 import Success from '@/components/Modals/Success';
 import { useRouter } from 'next/navigation';
@@ -21,6 +21,7 @@ function EditClientInfo({params}) {
   const router = useRouter();
   const [doi,setDoi] = useState(false);
   const [doiErr,setDoiErr] = useState(false);
+
   useEffect(()=>{
     const getData = async()=>{
       setLoading(true);
@@ -30,6 +31,7 @@ function EditClientInfo({params}) {
         setValue("firstName",res.client.firstName);
         setValue("lastName",res.client.lastName);
         setValue("phoneNumber",res.client.phoneNumber);
+        setValue("county",res.client.county);
         setValue("residence",res.client.residence);
         setValue("contactName",res.client.contactName);
         setValue("contactCell",res.client.contactCell);
@@ -47,8 +49,8 @@ function EditClientInfo({params}) {
   const getDOIDate= (date) => {
     setDoi(date);
   }
-  const handleEditClient = async({firstName,lastName,phoneNumber,residence,contactName,contactCell}) => {
-    const res = await editClientData({clientId:params.id,firstName,lastName,phoneNumber,residence,contactName,contactCell,doi});
+  const handleEditClient = async({firstName,lastName,phoneNumber,county,residence,contactName,contactCell}) => {
+    const res = await editClientData({clientId:params.id,firstName,lastName,phoneNumber,county,residence,contactName,contactCell,doi});
     if(res.status == 200) {
       setTriggerEffect(true);
       setSuccessMessage("Client Update operation was successfull");
@@ -109,6 +111,11 @@ function EditClientInfo({params}) {
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">Phone Number<span className="text-meta-1">*</span></label>
                         <input name="phoneNumber" {...register("phoneNumber",{required:{value: /^\d{10,10}$/,message:"Enter phone Number as per the format"}})} placeholder="0720-123-123 " className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.phoneNumber && "border-danger"}`} type="number"/>
                         {errors.phoneNumber && <div className='text-rose-500'>{errors?.phoneNumber?.message}</div>}
+                    </div>
+                    <div className="mb-4.5">
+                        <label className="mb-3 block text-sm font-medium text-black dark:text-white">County</label>
+                        <input name="County" {...register("county",{required:"County is required"})} placeholder="Enter client's County"className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary ${errors?.county && "border-danger"}`} type="text"/>
+                        {errors.county && <div className='text-rose-500'>{errors?.county?.message}</div>}
                     </div>
                     <div className="mb-4.5">
                         <label className="mb-3 block text-sm font-medium text-black dark:text-white">Residence</label>
