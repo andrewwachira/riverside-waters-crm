@@ -5,15 +5,17 @@ import { getClients, saveFilterInfo, getFilterData } from '@/actions/server';
 import useColorMode from '@/hooks/useColorMode';
 import toast from 'react-hot-toast';
 import moment from 'moment';
+import { useQuery } from '@tanstack/react-query';
 
 function FilterForm() {
-    const [colorMode, setColorMode] = useColorMode();
+    const {colorMode} = useColorMode();
     const [filterFormOpen,setFilterFormOpen] = useState(false); 
     const [selectedClient,setSelectedClient] = useState("");
     const [clientsLoading,setClientsLoading] = useState(false);
     const [clients,setClients] = useState([]);
     const [prevFilterFormData,setPrevFilterFormData] = useState([]);
-    const [preFilterOpen,setPreFilterOpen] = useState(false);
+    const [filterDataLoading,setFilterDataLoading] = useState(false);
+    const [u3Open,setU3Open] = useState(false);
     const [RoOpen,setRoOpen] = useState(false);
     const [PcOpen,setPcOpen] = useState(false);
     const [RcOpen,setRcOpen] = useState(false);
@@ -132,18 +134,26 @@ function FilterForm() {
             rc: false
         };
         let hasErrors = false;
+        
         if(!selectedClient || selectedClient === ""){
             newErrors.selectClient = true;
             hasErrors = true;
+            return;
         }
         if(!changeCycle || changeCycle === ""){
             newErrors.changeCycle = true;
             hasErrors = true;
+            return;
         }
         else if (changeCycle === "Installation"){
             // Check all required filter types
             const requiredFilters = ['u3', 'ro', 'pc', 'rc'];
-            
+            const clientFilters = prevFilterFormData;
+            const installationRound = clientFilters.find(entry => entry.changeCycle === "Installation");
+            if (!installationRound) {
+                toast.error("You have selected the wrong change cycle for the client. The client's filter data are past the installation round.");
+                return;
+            }
             requiredFilters.forEach(filter => {
                 if (!filterDates.some(item => item.filterName === filter)) {
                     newErrors[filter] = true;
@@ -165,6 +175,13 @@ function FilterForm() {
                         clientId: selectedClient._id,
                         changeCycle: changeCycle,
                         changeCycleIndex: 0,
+                        filtersChanged: filterDates.map(item => item.filterName),
+                        filterChangeHistory: filterDates.map(item => ({
+                            filterName: item.filterName,
+                            prevDate: selectedClient?.dateOfInstallation,
+                            nextDate: calculateNextDate(selectedClient?.dateOfInstallation, item.date)
+                        })),
+                        adminId: selectedClient._id,
                         // Extract dates for each filter from filterDates array
                         u3: calculateNextDate(selectedClient?.dateOfInstallation,filterDates.find(item => item.filterName === "u3")?.date || 0),
                         ro: calculateNextDate(selectedClient?.dateOfInstallation,filterDates.find(item => item.filterName === "ro")?.date || 0),
@@ -191,7 +208,7 @@ function FilterForm() {
             // Proceed with form submission if no errors
                 const latestFilter = prevFilterFormData[prevFilterFormData.length - 1];
                 if (!latestFilter) {
-                    toast.error("You have selected the wrong change cycle for the client.There is no previous filter data available.");
+                    toast.error("You have selected the wrong change cycle for the client.There is no previous filter data available. The next filter change cycle should be Installation.");
                     return;
                 }
                 if (latestFilter.changeCycleIndex+1 !==  parseInt(changeCycle.match(/\d+/)[0])) {
@@ -204,14 +221,20 @@ function FilterForm() {
                     clientId: selectedClient._id,
                     changeCycle: changeCycle,
                     changeCycleIndex: parseInt(changeCycle.match(/\d+/)[0]),
+                    filtersChanged: filterDates.map(item => item.filterName),
+                    filterChangeHistory: filterDates.map(item => ({
+                        filterName: item.filterName,
+                        prevDate: moment(latestFilter[item.filterName + "_ChangeDate"]).format("MM-DD-YYYY"),
+                        nextDate: calculateNextDate(latestFilter[item.filterName + "_ChangeDate"], item.date)
+                    })),
                     // Extract dates for each filter from filterDates array
-                    u3: calculateNextDate(latestFilter.u3_ChangeDate,filterDates.find(item => item.filterName === "u3")?.date || 0),
-                    ro: calculateNextDate(latestFilter.ro_ChangeDate,filterDates.find(item => item.filterName === "ro")?.date || 0),
-                    pc: calculateNextDate(latestFilter.pc_ChangeDate,filterDates.find(item => item.filterName === "pc")?.date || 0),   
-                    rc: calculateNextDate(latestFilter.rc_ChangeDate,filterDates.find(item => item.filterName === "rc")?.date || 0),               
+                    u3: calculateNextDate(latestFilter.u3_ChangeDate,filterDates.find(item => item.filterName === "u3")?.date || Date(latestFilter.u3_ChangeDate)),
+                    ro: calculateNextDate(latestFilter.ro_ChangeDate,filterDates.find(item => item.filterName === "ro")?.date || Date(latestFilter.ro_ChangeDate)),
+                    pc: calculateNextDate(latestFilter.pc_ChangeDate,filterDates.find(item => item.filterName === "pc")?.date || Date(latestFilter.pc_ChangeDate)),   
+                    rc: calculateNextDate(latestFilter.rc_ChangeDate,filterDates.find(item => item.filterName === "rc")?.date || Date(latestFilter.rc_ChangeDate)),               
                     adminComments: adminComments
                     };
-    
+                    console.log(filterInfo);
                     const res = await saveFilterInfo(filterInfo);
                     if (res.status === 201) {
                     toast.success("Filter Info Saved Successfully");
@@ -226,7 +249,7 @@ function FilterForm() {
                 } catch (error) {
                     toast.error("An error occurred while saving filter information");
                 }
-            } 
+        } 
     }
   return (
     <div className="flex m-5 flex-col gap-9">
@@ -270,6 +293,7 @@ function FilterForm() {
                     <div className="relative z-20 bg-transparent dark:bg-form-input">
                         <select  onChange={(e)=>{setChangeCycle(e.target.value);clearWarning("changeCycle");setFilterDates([])}}  className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
                                 <option value="" >Select...</option>      
+                                {filterDataLoading && <option value={0} disabled className="text-body dark:text-bodydark" >Loading Filter Data...</option>}
                                 <option disabled= {prevFilterFormData.find(entry => entry.changeCycle === "Installation") ? true : false} value="Installation">Installation</option>      
                                 {[...Array(10).keys()].map(key=> (
                                     <option disabled={key+1 <= prevFilterFormData[prevFilterFormData.length-1]?.changeCycleIndex ? true : false} value={key+1} key={key}>Filter Change {key + 1}</option>
@@ -295,7 +319,7 @@ function FilterForm() {
                         <div className="p-6.5">
                             {/* u3 */}
                             <div className="my-4.5 flex wrap items-center justify-between">
-                                <div className="flex-1 min-w-[200px]">
+                                <div className="flex-2 min-w-[400px]">
                                     <DatePicker2 inputName="u3" getDatefn={getDate} Err={FormErrors.u3} clearWarning={() => clearWarning("u3")} labelName="ultra 3 filter Installation Date" prevData={filterDates.find(x => x.filterName === "u3")}/>
                                 </div>
                                 <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
@@ -407,14 +431,14 @@ function FilterForm() {
                             <div>
                                 {/* u3 tab */}
                                 <div className='mb-4'>
-                                    <div onClick={()=>setPreFilterOpen(!preFilterOpen)} className={`w-full border border-stroke bg-blue-50 ${preFilterOpen ? "rounded-t-md" : "rounded-md"}  flex justify-between items-center p-5 font-medium focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
+                                    <div onClick={()=>setU3Open(!u3Open)} className={`w-full border border-stroke bg-blue-50 ${u3Open ? "rounded-t-md" : "rounded-md"}  flex justify-between items-center p-5 font-medium focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
                                         <p>Ultra 3 Filter </p>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} className={ !preFilterOpen ? `rotate-0 transition ease-in-out` : "rotate-45 transition ease-in-out"} color={"none"} fill={"none"}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} className={ !u3Open ? `rotate-0 transition ease-in-out` : "rotate-45 transition ease-in-out"} color={"none"} fill={"none"}>
                                             <path d="M12 4V20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                             <path d="M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                         </svg>
                                     </div>
-                                    <div className={`overflow-hidden transition-all duration-500 ease-in-out border border-stroke border-b-md ${ preFilterOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0" }`}>
+                                    <div className={`overflow-hidden transition-all duration-500 ease-in-out border border-stroke border-b-md ${  u3Open ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0" }`}>
                                         <div className="m-4.5 flex wrap items-center justify-between">
                                             <div className="flex-1 min-w-[200px]">
                                                 <DatePicker2 inputName="u3" getDatefn={getDate} Err={FormErrors.u3} clearWarning={() => clearWarning("u3")} labelName="Ultra 3 Filter Installation Date" prevData={filterDates.find(x => x.filterName === "u3")}/>

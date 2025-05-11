@@ -6,14 +6,24 @@ import Filter from '@/lib/db/models/Filter';
 import Test from '@/lib/db/models/Test';
 import Link from 'next/link';
 import { getDateDiff } from '@/lib/utils';
-
+import dynamic from 'next/dynamic';
+const ChangeHistoryTab = dynamic(() => import('@/components/ChangeHistoryTab'), {
+  ssr: false // Prevent server-side rendering for client components
+})
 async function Clients({params}) {
   
   await db.connect();
   const client = await Client.findById(params.id);
   const filterInfo = await Filter.find({clientId:params.id});
   const testInfo  = await Test.find({clientId:params.id});
-
+  await db.disconnect();
+  if (!client) {
+    return (
+      <DefaultLayout>
+        <div className="w-full border border-rose-600 rounded-md m-auto mx-4 mb-4 text-center my-3 bg-rose-200 p-3 text-rose-800">Client not found</div>
+      </DefaultLayout>
+    )
+  }
   return (
     <DefaultLayout>
       <Breadcrumb pageName="clients" additonalRoute={client.firstName}/>
@@ -230,39 +240,8 @@ async function Clients({params}) {
                 <div className="w-full border border-rose-600 rounded-md m-auto mx-4 mb-4 text-center my-3 bg-rose-200 p-3 text-rose-800">No Test Details Yet</div>
               }
         </div >
-
-        <div className="rounded-sm border border-stroke bg-white px-5 mb-7 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
-          <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Change History</h4>
-              <div className='flex w-full mb-6'>
-                <div className="grid grid-row-3 rounded-sm bg-gray-2 dark:bg-meta-4 w-full">
-                    <div className="p-2.5 border-b border-stroke ">
-                      <h5 className="text-sm font-medium uppercase xsm:text-base">Date</h5>
-                    </div>
-                    <div className="p-2.5 border-b border-stroke">
-                      <h5 className="text-sm font-medium uppercase xsm:text-base">Change Round</h5>
-                    </div>
-                    <div className="p-2.5 border-b border-stroke">
-                      <h5 className="text-sm font-medium uppercase xsm:text-base">Comments</h5>
-                    </div>
-                </div>
-                {
-                  filterInfo?.map(filter => (
-                    <div key={filter._id} className="grid grid-row-3 rounded-sm bg-white dark:bg-meta-4 w-full">
-                        <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                          <p className={`text-black`}>{filter.updatedAt?.toDateString()}</p>
-                        </div>
-                        <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                          <p className={`text-black`}>{filter.changeCycle}</p>
-                        </div>
-                        <div className=" border-b border-stroke flex items-center justify-center p-2.5">
-                          <p className={`text-black`}>{filter.comments ? filter.comments : "_"}</p>
-                        </div>
-                    </div>
-                  ) )
-                }
-            </div>
-            <Link href={`/dashboard/clients/${client._id}/filterHistory`} className="flex w-full justify-center rounded bg-orange-500 p-3 my-5 font-medium text-white hover:bg-opacity-90">View Filter History</Link>
-        </div>
+              {/* Change History tab */}
+            <ChangeHistoryTab filterInfo={JSON.parse(JSON.stringify(filterInfo))} />
 
         <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
           <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Account Status and Deletion</h4>

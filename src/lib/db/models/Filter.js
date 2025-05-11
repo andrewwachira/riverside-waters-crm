@@ -9,6 +9,14 @@ const filterSchema = new mongoose.Schema(
         rc_ChangeDate:{type:Date,required:true},
         changeCycle: {type:String,required:true},
         changeCycleIndex: {type:Number,required:true},
+        filtersChanged:[{type:String,required:true}],
+        filterChangeHistory:[
+            {
+                filterName:{type:String,required:true},
+                prevDate:{type:Date,required:true},
+                nextDate:{type:Date,required:true},
+             }],
+
         adminId: {type:mongoose.Schema.Types.ObjectId,ref:"User",required:true},
         comments: {type:String},
     },

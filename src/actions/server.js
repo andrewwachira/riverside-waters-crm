@@ -149,7 +149,7 @@ export const getClients = async () => {
     }
 }
 
-export const saveFilterInfo = async ({clientId,clientName,u3,pc,ro,rc,changeCycle,changeCycleIndex,adminComments}) => {
+export const saveFilterInfo = async ({clientId,clientName,u3,pc,ro,rc,changeCycle,changeCycleIndex,adminComments,filtersChanged,filterChangeHistory}) => {
     try {
         const {user} = await auth();
         if(!user){
@@ -165,6 +165,8 @@ export const saveFilterInfo = async ({clientId,clientName,u3,pc,ro,rc,changeCycl
             rc_ChangeDate : rc,
             changeCycle,
             changeCycleIndex,
+            filtersChanged,
+            filterChangeHistory,
             adminId : user._id,
             comments: adminComments,
         });
@@ -194,7 +196,25 @@ export const getFilterData = async (id) => {
         }
         await db.connect();
         const filterData = await Filter.find({clientId:id});
-        return {data:filterData}
+        const serialized = [];
+        filterData.forEach(filter => {
+            const serializedFilter = {
+                _id: filter._id.toString(),
+                createdAt: filter.createdAt.toDateString(),
+                updatedAt: filter.updatedAt.toDateString(),
+                u3_ChangeDate: filter.u3_ChangeDate.toDateString(),
+                ro_ChangeDate : filter.ro_ChangeDate.toDateString(),
+                pc_ChangeDate : filter.pc_ChangeDate.toDateString(),
+                rc_ChangeDate : filter.rc_ChangeDate.toDateString(),
+                changeCycle:filter.changeCycle,
+                changeCycleIndex:filter.changeCycleIndex,
+                filtersChanged:filter.filtersChanged,
+                adminId:filter.adminId,
+                comments:filter.comments,
+            }
+            serialized.push(serializedFilter);
+        })
+        return {data:serialized};
        
     } catch (error) {
         return {status:500, message:error}
@@ -272,7 +292,7 @@ export const editClientData = async({clientId,firstName,lastName,phoneNumber,cou
 }
 
 
-export const editFilterData = async({clientId,sedimentFilter,u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate})=> {
+export const editFilterData = async({clientId,u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate})=> {
     try {
         const {user} = await auth();
         if(!user){
@@ -282,7 +302,7 @@ export const editFilterData = async({clientId,sedimentFilter,u3_ChangeDate,ro_Ch
         const filter = await Filter.findOne({clientId});
         const client = await Client.findById(clientId);
         await filter.updateOne({
-            sedimentFilter,u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate,
+            u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate,
         })
         const activity = new AdminActivity({
             name:"CLIENT EDIT FILTER INFO",
