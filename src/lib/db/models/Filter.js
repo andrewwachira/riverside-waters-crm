@@ -19,6 +19,12 @@ const filterSchema = new mongoose.Schema(
 
         adminId: {type:mongoose.Schema.Types.ObjectId,ref:"User",required:true},
         comments: {type:String},
+        status: [
+            {
+                filterName: {type: String, enum:["u3","ro","pc","rc"], required: true},
+                status :{type:String, enum: ["Active", "Replaced", "Past Due"],default: "Pending"},
+            },
+        ],
     },
     {
         timestamps:true

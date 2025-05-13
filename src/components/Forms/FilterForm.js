@@ -6,6 +6,8 @@ import useColorMode from '@/hooks/useColorMode';
 import toast from 'react-hot-toast';
 import moment from 'moment';
 import { useQuery } from '@tanstack/react-query';
+import FullInstallation from '../FormElements/FilterElements/FullInstallation';
+import SelectiveInstallation from '../FormElements/FilterElements/SelectiveInstallation';
 
 function FilterForm() {
     const {colorMode} = useColorMode();
@@ -22,6 +24,8 @@ function FilterForm() {
     const [changeCycle,setChangeCycle] = useState("");
     const [adminComments,setAdminComments] = useState("");
     const [filterDates,setFilterDates] = useState([]);
+    const [filters,setFilters] = useState([]);
+    const [selectionComplete,setSelectionComplete] = useState(false);
     const [FormErrors, setFormErrors] = useState({
         selectClient: false,
         changeCycle: false,
@@ -117,7 +121,7 @@ function FilterForm() {
             // Add the selected number of months and format the result
             return baseDate.add(monthsToAdd, 'months').format('MMM DD, YYYY');
         } catch (error) {
-            console.error("Error calculating next date:", error);
+            // console.error("Error calculating next date:", error);
             return "Error calculating date";
         }
     };
@@ -134,7 +138,6 @@ function FilterForm() {
             rc: false
         };
         let hasErrors = false;
-        
         if(!selectedClient || selectedClient === ""){
             newErrors.selectClient = true;
             hasErrors = true;
@@ -150,7 +153,7 @@ function FilterForm() {
             const requiredFilters = ['u3', 'ro', 'pc', 'rc'];
             const clientFilters = prevFilterFormData;
             const installationRound = clientFilters.find(entry => entry.changeCycle === "Installation");
-            if (!installationRound) {
+            if (installationRound) {
                 toast.error("You have selected the wrong change cycle for the client. The client's filter data are past the installation round.");
                 return;
             }
@@ -234,7 +237,6 @@ function FilterForm() {
                     rc: calculateNextDate(latestFilter.rc_ChangeDate,filterDates.find(item => item.filterName === "rc")?.date || Date(latestFilter.rc_ChangeDate)),               
                     adminComments: adminComments
                     };
-                    console.log(filterInfo);
                     const res = await saveFilterInfo(filterInfo);
                     if (res.status === 201) {
                     toast.success("Filter Info Saved Successfully");
@@ -263,7 +265,7 @@ function FilterForm() {
                     </svg>
                 </div>
             </div>
-            <form onSubmit={handleFilterInfo}  id="filter-change-form"className={`overflow-hidden transition-all duration-500 ease-in-out ${ filterFormOpen ? "max-h-[1500px] opacity-100" : "max-h-0 opacity-0" }`}>
+            <form onSubmit={handleFilterInfo}  id="filter-change-form"className={`overflow-hidden transition-all duration-500 ease-in-out ${ filterFormOpen ? "max-h-[15000px] opacity-100" : "max-h-0 opacity-0" }`}>
                 <div className=" p-6.5">
                         <label className="mb-2.5 block text-black dark:text-white"> Client </label>
                         <div className="relative z-20 bg-transparent dark:bg-form-input">
@@ -287,7 +289,35 @@ function FilterForm() {
                         {FormErrors.selectClient && (<div className="text-rose-500 text-sm mt-1">Please select a client</div>)}
                 </div>
                
-                { selectedClient && 
+                { selectedClient && !selectionComplete &&
+                <div className="p-6.5">
+                    <p>Which Filters of {selectedClient?.firstName} {selectedClient.lastName} would you like to change ? </p>
+                        <div className=" mt-4">
+                            <div className='p-4.5 w-full border border-stroke my-2 rounded-md hover:bg-stone-50 dark:border-strokedark dark:bg-form-input'>
+                                <input type="checkbox" id="u3" name="u3" value="u3" checked={filters.includes("u3")} onChange={(e)=>{setFilters(prevState => e.target.checked ?  [...prevState,  e.target.value] : prevState.filter(item=> item !== e.target.value))}} className="mr-2"/>
+                                <label htmlFor="u3" className="text-sm font-medium text-black dark:text-white">Ultra 3 Filter</label>
+                            </div>
+                            <div className='p-4.5 w-full border border-stroke my-2 rounded-md hover:bg-stone-50 dark:border-strokedark dark:bg-form-input'>
+                                <input type="checkbox" id="ro" name="ro" value="ro" checked={filters.includes("ro")} onChange={(e)=>{setFilters(prevState => e.target.checked ?  [...prevState,  e.target.value] : prevState.filter(item=> item !== e.target.value))}} className="mr-2"/>
+                                <label htmlFor="ro" className="text-sm font-medium text-black dark:text-white">Reverse Osmosis Filter</label>
+                            </div>
+                            <div className='p-4.5 w-full border border-stroke my-2 rounded-md hover:bg-stone-50 dark:border-strokedark dark:bg-form-input'>
+                                <input type="checkbox" id="pc" name="pc" value="pc" checked={filters.includes("pc")} onChange={(e)=>{setFilters(prevState => e.target.checked ?  [...prevState,  e.target.value] : prevState.filter(item=> item !== e.target.value))}} className="mr-2"/>
+                                <label htmlFor="pc" className="text-sm font-medium text-black dark:text-white">Post Carbon Filter</label>
+                            </div>
+                            <div className='p-4.5 w-full border border-stroke my-2 rounded-md hover:bg-stone-50 dark:border-strokedark dark:bg-form-input'>
+                                <input type="checkbox" id="rc" name="rc" value="rc" checked={filters.includes("rc")} onChange={(e)=>{setFilters(prevState => e.target.checked ?  [...prevState,  e.target.value] : prevState.filter(item=> item !== e.target.value))}} className="mr-2"/>
+                                <label htmlFor="rc" className="text-sm font-medium text-black dark:text-white">Remineralizing Cartilage Filter</label>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <button type="button" onClick={()=>{ filters.length > 0 ? setSelectionComplete(true) : toast.error("Choose the filter(s) that should be replaced / installed")}} className="m-4.5 flex w-full justify-center rounded bg-primary p-3 font-medium text-white hover:bg-opacity-90">Done</button>
+                                {filters.length > 0 && <button type="button" onClick={()=>{setFilters([])}} className="m-4.5 flex w-full justify-center rounded bg-danger p-3 font-medium text-white hover:bg-opacity-90">Clear All</button>}
+                            </div>
+                            
+                        </div>
+                </div>
+                }
+                {selectionComplete && filters?.length > 0 &&
                 <div className='p-6.5'>
                     <label className="mb-3 block text-sm font-medium text-black dark:text-white">Select Change Cycle</label>
                     <div className="relative z-20 bg-transparent dark:bg-form-input">
@@ -316,278 +346,9 @@ function FilterForm() {
                     !changeCycle ?
                     null :
                     changeCycle === "Installation" ? (
-                        <div className="p-6.5">
-                            {/* u3 */}
-                            <div className="my-4.5 flex wrap items-center justify-between">
-                                <div className="flex-2 min-w-[400px]">
-                                    <DatePicker2 inputName="u3" getDatefn={getDate} Err={FormErrors.u3} clearWarning={() => clearWarning("u3")} labelName="ultra 3 filter Installation Date" prevData={filterDates.find(x => x.filterName === "u3")}/>
-                                </div>
-                                <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                    <div className="text-sm flex align-items justify-around">
-                                        <div>
-                                            <div className="font-medium mb-1">Current Installation:</div> 
-                                            <div>{selectedClient?.dateOfInstallation ? moment(selectedClient.dateOfInstallation).format('MMM DD, YYYY') : "Not set"}</div>
-                                        </div>
-                                        
-                                        <div>
-                                            <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                            <div className={`${filterDates.find(x=>x.filterName === "u3") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                {filterDates.find(x => x.filterName === "u3") 
-                                                ? calculateNextDate(selectedClient?.dateOfInstallation, filterDates.find(x => x.filterName === "u3").date)
-                                                : "Select a replacement period"}
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            {FormErrors.u3 && ( <div className="text-rose-500 text-sm mt-1 mb-3">Please select a replacement period for Ultra 3 Filter</div>)}
-                            <hr/>
-                            {/* ro */}
-                            <div className="my-4.5 flex wrap items-center justify-between">
-                                <div className="flex-1 min-w-[200px]">
-                                    <DatePicker2 inputName="ro" getDatefn={getDate} Err={FormErrors.ro} clearWarning={() => clearWarning("ro")} labelName="Reverse Osmosis Filter Installation Date" prevData={filterDates.find(x => x.filterName === "ro")}/>
-                                </div>
-                                <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                    <div className="text-sm flex align-items justify-around">
-                                        <div>
-                                            <div className="font-medium mb-1">Current Installation:</div> 
-                                            <div>{selectedClient?.dateOfInstallation ? moment(selectedClient.dateOfInstallation).format('MMM DD, YYYY') : "Not set"}</div>
-                                        </div>
-                                        
-                                        <div>
-                                            <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                            <div className={`${filterDates.find(x=>x.filterName === "ro") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                {filterDates.find(x => x.filterName === "ro") 
-                                                ? calculateNextDate(selectedClient?.dateOfInstallation, filterDates.find(x => x.filterName === "ro").date)
-                                                : "Select a replacement period"}
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            {FormErrors.ro && ( <div className="text-rose-500 text-sm mt-1 mb-3">Please select a replacement period for Reverse Osmosis</div>)}
-                            <hr/>
-                            {/* pc */}
-                            <div className="my-4.5 flex wrap items-center justify-between">
-                                <div className="flex-1 min-w-[200px]">
-                                    <DatePicker2 inputName="pc" getDatefn={getDate} Err={FormErrors.pc} clearWarning={() => clearWarning("pc")} labelName="Post Carbon Filter Installation Date" prevData={filterDates.find(x => x.filterName === "pc")}/>
-                                </div>
-                                <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                    <div className="text-sm flex align-items justify-around">
-                                        <div>
-                                            <div className="font-medium mb-1">Current Installation:</div> 
-                                            <div>{selectedClient?.dateOfInstallation ? moment(selectedClient.dateOfInstallation).format('MMM DD, YYYY') : "Not set"}</div>
-                                        </div>
-                                        
-                                        <div>
-                                            <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                            <div className={`${filterDates.find(x=>x.filterName === "pc") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                {filterDates.find(x => x.filterName === "pc") 
-                                                ? calculateNextDate(selectedClient?.dateOfInstallation, filterDates.find(x => x.filterName === "pc").date)
-                                                : "Select a replacement period"}
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            {FormErrors.pc && ( <div className="text-rose-500 text-sm mt-1 mb-3">Please select a replacement period for Post Carbon Filter</div>)}
-                            <hr/>
-                            {/* rc */}
-                            <div className="my-4.5 flex wrap items-center justify-between">
-                                <div className="flex-1 min-w-[200px]">
-                                    <DatePicker2 inputName="rc" getDatefn={getDate} Err={FormErrors.rc} clearWarning={() => clearWarning("rc")} labelName="Remineralyzing Cartilage Installation Date" prevData={filterDates.find(x => x.filterName === "rc")}/>
-                                </div>
-                                <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                    <div className="text-sm flex align-items justify-around">
-                                        <div>
-                                            <div className="font-medium mb-1">Current Installation:</div> 
-                                            <div>{selectedClient?.dateOfInstallation ? moment(selectedClient.dateOfInstallation).format('MMM DD, YYYY') : "Not set"}</div>
-                                        </div>
-                                        
-                                        <div>
-                                            <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                            <div className={`${filterDates.find(x=>x.filterName === "rc") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                {filterDates.find(x => x.filterName === "rc") 
-                                                ? calculateNextDate(selectedClient?.dateOfInstallation, filterDates.find(x => x.filterName === "rc").date)
-                                                : "Select a replacement period"}
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            {FormErrors.rc && ( <div className="text-rose-500 text-sm mt-1 mb-3">Please select a replacement period for Remineralizing Cartilage</div>)}
-                            <hr/>
-                            <div className="w-full my-4.5">
-                                <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
-                                <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Notes for this filter change e.g 'First installation', 'first filter change cycle'" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
-                            </div>
-                            <button type="submit" onSubmit={handleFilterInfo} className="flex w-full justify-center rounded bg-primary p-3 font-medium text-white hover:bg-opacity-90">Save Filter Info</button>
-                        </div>
+                        <FullInstallation getDate={getDate} selectedClient={selectedClient} clearWarning={clearWarning} FormErrors={FormErrors} filterDates={filterDates} handleFilterInfo={handleFilterInfo} calculateNextDate={calculateNextDate} setAdminComments={setAdminComments}/>
                     ) : <div className='p-6.5'>
-                            <div>
-                                {/* u3 tab */}
-                                <div className='mb-4'>
-                                    <div onClick={()=>setU3Open(!u3Open)} className={`w-full border border-stroke bg-blue-50 ${u3Open ? "rounded-t-md" : "rounded-md"}  flex justify-between items-center p-5 font-medium focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
-                                        <p>Ultra 3 Filter </p>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} className={ !u3Open ? `rotate-0 transition ease-in-out` : "rotate-45 transition ease-in-out"} color={"none"} fill={"none"}>
-                                            <path d="M12 4V20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            <path d="M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <div className={`overflow-hidden transition-all duration-500 ease-in-out border border-stroke border-b-md ${  u3Open ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0" }`}>
-                                        <div className="m-4.5 flex wrap items-center justify-between">
-                                            <div className="flex-1 min-w-[200px]">
-                                                <DatePicker2 inputName="u3" getDatefn={getDate} Err={FormErrors.u3} clearWarning={() => clearWarning("u3")} labelName="Ultra 3 Filter Installation Date" prevData={filterDates.find(x => x.filterName === "u3")}/>
-                                            </div>
-                                            <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                                <div className="text-sm flex align-items justify-around">
-                                                    <div>
-                                                        <div className="font-medium mb-1">Current Installation:</div> 
-                                                        <div>{prevFilterFormData[prevFilterFormData.length-1]?.u3_ChangeDate ? moment(prevFilterFormData[prevFilterFormData.length-1]?.u3_ChangeDate).format('MMM DD, YYYY') : "Not set"}</div>
-                                                    </div>
-                                            
-                                                    <div>
-                                                        <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                                        <div className={`${filterDates.find(x=>x.filterName === "u3") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                            {filterDates.find(x => x.filterName === "u3") 
-                                                            ? calculateNextDate(prevFilterFormData[prevFilterFormData.length-1]?.u3_ChangeDate, filterDates.find(x => x.filterName === "u3").date)
-                                                            : "Select a replacement period"}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>                                       
-                                        <div className="w-full p-4.5">
-                                            <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
-                                            <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Notes for this filter change e.g 'First installation', 'first filter change cycle'" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
-
-                                            <button type='submit' onClick={handleFilterInfo} className='flex w-full justify-center rounded bg-primary mt-4.5 p-3 font-medium text-white hover:bg-opacity-90'>Save Ultra 3 Filter Date</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* RO tab */}
-                                <div className='mb-4'>
-                                    <div onClick={()=>setRoOpen(!RoOpen)} className={`w-full border border-stroke bg-blue-50 ${RoOpen ? "rounded-t-md" : "rounded-md"}  flex justify-between items-center p-5 font-medium focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
-                                        <p>Reverse Osmosis</p>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} className={ !RoOpen ? `rotate-0 transition ease-in-out` : "rotate-45 transition ease-in-out"} color={"none"} fill={"none"}>
-                                            <path d="M12 4V20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            <path d="M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <div className={`overflow-hidden transition-all duration-500 ease-in-out border border-stroke rounded-b-md ${ RoOpen ? "max-h-[550px] opacity-100" : "max-h-0 opacity-0" }`}>
-                                        <div className="m-4.5 flex wrap items-center justify-between">
-                                            <div className="flex-1 min-w-[200px]">
-                                                <DatePicker2 inputName="ro" getDatefn={getDate} Err={FormErrors.ro} clearWarning={() => clearWarning("ro")} labelName="Reverse Osmosis Filter Installation Date" prevData={filterDates.find(x => x.filterName === "ro")}/>
-                                            </div>
-                                            <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                                <div className="text-sm flex align-items justify-around">
-                                                    <div>
-                                                        <div className="font-medium mb-1">Current Installation:</div> 
-                                                        <div>{prevFilterFormData[prevFilterFormData.length-1]?.ro_ChangeDate ? moment(prevFilterFormData[prevFilterFormData.length-1]?.ro_ChangeDate).format('MMM DD, YYYY') : "Not set"}</div>
-                                                    </div>
-                                            
-                                                    <div>
-                                                        <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                                        <div className={`${filterDates.find(x=>x.filterName === "ro") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                            {filterDates.find(x => x.filterName === "ro") 
-                                                            ? calculateNextDate(prevFilterFormData[prevFilterFormData.length-1]?.ro_ChangeDate, filterDates.find(x => x.filterName === "ro").date)
-                                                            : "Select a replacement period"}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="w-full p-4.5">
-                                            <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
-                                            <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Notes for this filter change e.g 'First installation', 'first filter change cycle'" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
-                                            <button type='submit' className='flex w-full justify-center rounded bg-primary mt-4.5 p-3 font-medium text-white hover:bg-opacity-90'>Save Reverse Osmosis Filter Date</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* PC tab */}
-                                <div className='mb-4'>
-                                    <div onClick={()=>setPcOpen(!PcOpen)} className={`w-full border border-stroke bg-blue-50 ${PcOpen ? "rounded-t-md" : "rounded-md"} flex justify-between items-center p-5 font-medium focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
-                                        <p>Post Carbon</p>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} className={ !PcOpen ? `rotate-0 transition ease-in-out` : "rotate-45 transition ease-in-out"} color={"none"} fill={"none"}>
-                                            <path d="M12 4V20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            <path d="M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <div className={`overflow-hidden transition-all duration-500 ease-in-out border border-stroke rounded-b-md ${ PcOpen ? "max-h-[550px] opacity-100" : "max-h-0 opacity-0" }`}>
-                                        <div className="m-4.5 flex wrap items-center justify-between">
-                                            <div className="flex-1 min-w-[200px]">
-                                                <DatePicker2 inputName="pc" getDatefn={getDate} Err={FormErrors.pc} clearWarning={() => clearWarning("pc")} labelName="Post Carbon Filter Installation Date" prevData={filterDates.find(x => x.filterName === "pc")}/>
-                                            </div>
-                                            <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                                <div className="text-sm flex align-items justify-around">
-                                                    <div>
-                                                        <div className="font-medium mb-1">Current Installation:</div> 
-                                                        <div>{prevFilterFormData[prevFilterFormData.length-1]?.pc_ChangeDate ? moment(prevFilterFormData[prevFilterFormData.length-1]?.pc_ChangeDate).format('MMM DD, YYYY') : "Not set"}</div>
-                                                    </div>
-                                            
-                                                    <div>
-                                                        <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                                        <div className={`${filterDates.find(x=>x.filterName === "pc") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                            {filterDates.find(x => x.filterName === "pc") 
-                                                            ? calculateNextDate( prevFilterFormData[prevFilterFormData.length-1]?.pc_ChangeDate, filterDates.find(x => x.filterName === "pc").date)
-                                                            : "Select a replacement period"}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="w-full p-4.5">
-                                            <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
-                                            <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Notes for this filter change e.g 'First installation', 'first filter change cycle'" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
-                                            <button type='submit' className='flex w-full justify-center rounded bg-primary mt-4.5 p-3 font-medium text-white hover:bg-opacity-90'>Save Post Carbon Filter Date</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* RC tab */}
-                                <div className='mb-4'>
-                                    <div onClick={()=>setRcOpen(!RcOpen)} className={`w-full border border-stroke bg-blue-50 font-white ${RcOpen ? "rounded-t-md" : "rounded-md"} flex justify-between items-center p-5 font-medium focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary`}>
-                                        <p>Remineralizing Cartilage </p>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} className={ !RcOpen ? `rotate-0 transition ease-in-out` : "rotate-45 transition ease-in-out"} color={"none"} fill={"none"}>
-                                            <path d="M12 4V20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                            <path d="M4 12H20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <div className={`overflow-hidden transition-all duration-500 ease-in-out border border-stroke rounded-b-md ${ RcOpen ? "max-h-[550px] opacity-100" : "max-h-0 opacity-0" }`}>
-                                        <div className="m-4.5 flex wrap items-center justify-between">
-                                            <div className="flex-1 min-w-[200px]">
-                                                <DatePicker2 inputName="rc" getDatefn={getDate} Err={FormErrors.rc} clearWarning={() => clearWarning("rc")} labelName="Remineralyzing Cartilage Installation Date" prevData={filterDates.find(x => x.filterName === "rc")}/>
-                                            </div>
-                                            <div className="flex-1 min-w-[200px] px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md ml-4">
-                                                <div className="text-sm flex align-items justify-around">
-                                                    <div>
-                                                        <div className="font-medium mb-1">Current Installation:</div> 
-                                                        <div>{prevFilterFormData[prevFilterFormData.length-1]?.rc_ChangeDate ? moment(prevFilterFormData[prevFilterFormData.length-1]?.rc_ChangeDate).format('MMM DD, YYYY') : "Not set"}</div>
-                                                    </div>
-                                            
-                                                    <div>
-                                                        <div className="font-medium mt-2 mb-1">Next Replacement:</div>
-                                                        <div className={`${filterDates.find(x=>x.filterName === "rc") ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"} font-medium`}>
-                                                            {filterDates.find(x => x.filterName === "rc") 
-                                                            ? calculateNextDate(prevFilterFormData[prevFilterFormData.length-1]?.rc_ChangeDate, filterDates.find(x => x.filterName === "rc").date)
-                                                            : "Select a replacement period"}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="w-full p-4.5">
-                                            <label className="mb-3 block text-sm font-medium text-black dark:text-white">Admin Comments </label>
-                                            <input onChange={(e)=>setAdminComments(e.target.value)} name='adminComments' placeholder="Notes for this filter change e.g 'First installation', 'first filter change cycle'" className={`w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary" type="text `}/>
-                                            <button type='submit' className='flex w-full justify-center rounded bg-primary mt-4.5 p-3 font-medium text-white hover:bg-opacity-90'>Save Remineralizing Cartilage Filter Date</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <SelectiveInstallation prevFilterFormData={prevFilterFormData} setPcOpen={setPcOpen} setRcOpen={setRcOpen} setRoOpen={setRoOpen} setU3Open={setU3Open} RcOpen={RcOpen} RoOpen={RoOpen} u3Open={u3Open} PcOpen={PcOpen} filters={filters} getDate={getDate} clearWarning={clearWarning} FormErrors={FormErrors} filterDates={filterDates} handleFilterInfo={handleFilterInfo} calculateNextDate={calculateNextDate} setAdminComments={setAdminComments} />
                         </div>
                 }
             </form>
