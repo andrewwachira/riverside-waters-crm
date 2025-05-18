@@ -32,7 +32,6 @@ function EditProfile() {
       setValue("bio",data.bio);
       setEmail(data.email);
       setImage(data.image);
-      setName(data.name);
     }
     fetchData();
   },[ setValue,trigger])
@@ -185,6 +184,7 @@ function EditProfile() {
                         alert("Upload Completed");
                         }}
                         onUploadError={(error) => {
+                          console.log(error);
                         alert(`ERROR! ${error.message}`);
                         }}/>
                   <div className="flex justify-end mt-3 gap-4.5">

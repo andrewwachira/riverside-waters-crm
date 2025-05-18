@@ -149,45 +149,86 @@ export const getClients = async () => {
     }
 }
 
-export const saveFilterInfo = async ({clientId,clientName,u3,pc,ro,rc,changeCycle,changeCycleIndex,adminComments,filtersChanged,filterChangeHistory}) => {
+export const saveFilterInfo = async ({clientId, clientName, u3, pc, ro, rc, changeCycle, changeCycleIndex, adminComments, filtersChanged, filterChangeHistory}) => {
     try {
         const {user} = await auth();
         if(!user){
-            return {message:"This operation is only possible if you are logged in as an admin",status:403};
+            return {message:"This operation is only possible if you are logged in as an admin", status:403};
         }
         await db.connect();
         const client = await Client.findById(clientId);
-        const filterInfo =  new Filter({
+        
+        // Find the most recent filter for this client
+        const lastFilter = await Filter.findOne({clientId: clientId}).sort({createdAt: -1});
+        // If there's a previous filter, update its status
+        if(lastFilter) {
+            // Create an array to hold updated status entries
+            const updatedStatus = [];
+            // Check each filter type and update status appropriately
+            const filterTypes = ["u3", "ro", "pc", "rc"];
+            const newDates = [u3, ro, pc, rc];
+            
+            filterTypes.forEach((filterType, index) => {
+                const oldDateField = `${filterType}_ChangeDate`;
+                const oldDate = lastFilter[oldDateField];
+                const newDate = newDates[index];
+                
+                // If dates are different, mark the old one as "Replaced"
+                // Otherwise, keep as "Active"
+                updatedStatus.push({
+                    filterName: filterType,
+                    status: newDate.toString() !== oldDate.toString() ? "Replaced" : "Active"
+                });
+            });
+            
+            // Update the previous filter's status
+            await Filter.findByIdAndUpdate(lastFilter._id, {
+                status: updatedStatus
+            });
+        }
+        
+        // Create new filter entry
+        const filterInfo = new Filter({
             clientId,
             u3_ChangeDate: u3,
-            ro_ChangeDate : ro,
-            pc_ChangeDate : pc,
-            rc_ChangeDate : rc,
+            ro_ChangeDate: ro,
+            pc_ChangeDate: pc,
+            rc_ChangeDate: rc,
             changeCycle,
             changeCycleIndex,
             filtersChanged,
             filterChangeHistory,
-            adminId : user._id,
+            adminId: user._id,
             comments: adminComments,
+            status: [
+                { filterName: "u3", status: "Active" },
+                { filterName: "ro", status: "Active" },
+                { filterName: "pc", status: "Active" },
+                { filterName: "rc", status: "Active" }
+            ]
         });
+        
         await filterInfo.save();
+        
+        // Log admin activity
         const activity = new AdminActivity({
-            name:"CLIENT FILTER REGISTRATION",
-            activity : {
+            name: "CLIENT FILTER REGISTRATION",
+            activity: {
                 admin: user.name,
                 adminId: user._id,
                 action: `Registered filters for ${client.firstName} ${client.lastName}`
             },
-            date:Date.now()
-        })
+            date: Date.now()
+        });
+        
         await activity.save();
-        return {status:201,message:`Filter information for ${clientName} saved successfully`}
+        
+        return {status: 201, message: `Filter information for ${clientName} saved successfully`};
     } catch (error) {
         console.log(error.message);
-        return {status:500, message:error.message}
+        return {status: 500, message: error.message};
     }
 }
-
 export const getFilterData = async (id) => {
     try {
         const {user} = await auth();

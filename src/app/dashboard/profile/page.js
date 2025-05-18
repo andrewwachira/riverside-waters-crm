@@ -1,19 +1,22 @@
-import React from 'react'
-import DefaultLayout from '@/components/Layouts/DefaultLayout'
-import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb'
-import Image from 'next/image'
-import Link from 'next/link'
-import { auth } from '@/auth'
+import React from 'react';
+import DefaultLayout from '@/components/Layouts/DefaultLayout';
+import Breadcrumb from '@/components/Breadcrumbs/Breadcrumb';
+import Image from 'next/image';
+import Link from 'next/link';
+import { auth } from '@/auth';
 import bg1 from "../../../../public/images/pattern2.png";
 import avatar from "../../../../public/images/avatar.png";
-import db from '@/lib/db'
+import db from '@/lib/db';
 import User from '@/lib/db/models/User';
+import Filter from '@/lib/db/models/Filter';
 
 async function Profile() {
   const session = await auth();
   await db.connect();
+  const filters  = await Filter.find({adminId:session?.user?._id});
+  const filterCount = filters.length;
   const me = await User.findOne({email:session?.user?.email});
- 
+  console.log(me.image);
   return (
     <DefaultLayout>
         <Breadcrumb pageName={"profile"}/>
@@ -47,7 +50,7 @@ async function Profile() {
                 <div className="flex flex-col items-center justify-center gap-1 px-4 xsm:flex-row">
                   <span className="text-sm">Filter Changes:</span>
                   <span className="font-semibold text-black dark:text-white">
-                    20
+                    {filterCount}
                   </span>
                 </div>
               </div>
