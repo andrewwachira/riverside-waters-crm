@@ -1,27 +1,29 @@
 // vercel-cron-job.js
 // This file is designed for Vercel Cron Jobs with 10s timeout constraints
-
+import {NextResponse as res} from 'next/server';
 import db from '@/lib/db';
 import Filter from '@/lib/db/models/Filter';
 import Notification from '@/lib/db/models/Notification';
-
+import ProcessingQueue from '@/lib/db/models/ProcessingQueue';
 /**
  * Main handler for Vercel cron job
  * Instead of processing everything at once, this identifies work to be done
  * and queues it for background processing
  */
-export default async function handler(req, res) {
+export async function POST(req) {
+
     try {
         // Quick validation that this is being called by Vercel cron
+        console.log('Cron job triggered');
         if (req.method !== 'POST') {
-            return res.status(405).json({ error: 'Method not allowed' });
+            return res.json({ error: 'Method not allowed' },{status:405});
         }
         
-        // Verify the cron job signature if needed
-        // const signature = req.headers['x-vercel-cron-signature'];
-        // if (!verifySignature(signature)) {
-        //    return res.status(401).json({ error: 'Unauthorized' });
-        // }
+        // // Verify the cron job signature if needed
+    //    const authToken = (req.headers.get('authorization') || '').split('Bearer ').at(1);
+    //     if (!authToken || authToken !== process.env.CRON_SECRET) {
+    //         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    //     }
         
         console.log('Starting filter status check job');
         const startTime = Date.now();
@@ -134,7 +136,7 @@ export default async function handler(req, res) {
         
         // Combine all queue items
         const processingQueue = [...updateQueue, ...notificationQueue, ...retryQueue];
-        
+        console.log(processingQueue);
         // Save all queued tasks to the database
         if (processingQueue.length > 0) {
             await ProcessingQueue.insertMany(processingQueue);
@@ -145,7 +147,7 @@ export default async function handler(req, res) {
         console.log(`Cron job completed in ${elapsed}ms`);
         
         // Return success response
-        return res.status(200).json({ 
+        return res.json({ 
             success: true, 
             message: 'Tasks queued successfully',
             stats: {
@@ -155,13 +157,13 @@ export default async function handler(req, res) {
                 totalTasks: processingQueue.length,
                 executionTime: `${elapsed}ms`
             }
-        });
+        },{status:200});
     } catch (error) {
         console.error('Error in cron job:', error);
-        return res.status(500).json({ 
+        return res.json({ 
             error: 'Cron job execution failed',
             message: error.message
-        });
+        },{status:500});
     } finally {
         // Ensure database connection is closed
         try {

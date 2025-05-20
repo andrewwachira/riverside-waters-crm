@@ -17,7 +17,7 @@ function EditFilterInfo({params}) {
   const [successMessage,setSuccessMessage] = useState("");
   const [triggerEffect,setTriggerEffect] = useState(false);
   const router = useRouter();
-  const [hasSedimentFilter,setHasSedimentFilter] = useState(false);
+  const [filterId,setFilterId] = useState(null);
   const [u3,setU3] = useState(false);
   const [ro,setRo] = useState(false);
   const [pc,setPc] = useState(false);
@@ -38,7 +38,6 @@ function EditFilterInfo({params}) {
       const data = await res.json();
       if(res.status === 200) setRes(res); setLoading(false);
       if(res.status === 200 && data.filter !== null){
-        setSedimentFilter(data.filter.sedimentFilter)
         setU3Val(data.filter.u3_ChangeDate);
         setRoVal(data.filter.ro_ChangeDate);
         setPcVal(data.filter.pc_ChangeDate);
@@ -47,6 +46,7 @@ function EditFilterInfo({params}) {
         const prevRo = {filterName:"ro",date:data.filter.ro_ChangeDate};
         const prevPc = {filterName:"pc",date:data.filter.pc_ChangeDate};
         const prevRc = {filterName:"rc",date:data.filter.rc_ChangeDate};
+        setFilterId(data.filter._id);
         setFilterDates([prevU3,prevRo,prevPc,prevRc]);
       }else{
         setFetchError(res.error);
@@ -88,7 +88,7 @@ function EditFilterInfo({params}) {
     }else{
         const filterData =  {
           clientId : params.id,
-          sedimentFilter: hasSedimentFilter,
+          filterId : filterId,
           u3_ChangeDate : filterDates.find(date=> date.filterName === "u3").date,
           ro_ChangeDate : filterDates.find(date=> date.filterName === "ro").date,
           pc_ChangeDate : filterDates.find(date=> date.filterName === "pc").date,
@@ -150,22 +150,6 @@ function EditFilterInfo({params}) {
               </div>
               :
               <div>
-                <div className="p-6.5 flex items-center justify-between">
-                    <label htmlFor="formCheckbox" className="flex cursor-pointer">
-                        <div className="relative">
-                            <input id="formCheckbox" defaultChecked={sedimentFilter} onChange={(e)=> setHasSedimentFilter(e.target.value == "on" ? true : false)} className="taskCheckbox sr-only" type="checkbox"/>
-                            <div className="box mr-3 flex h-5 w-5 items-center justify-center rounded border border-stroke dark:border-strokedark">
-                                <span className="text-white opacity-0">
-                                    <svg className="fill-current" width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path fillRule="evenodd" clipRule="evenodd" d="M9.70685 0.292804C9.89455 0.480344 10 0.734667 10 0.999847C10 1.26503 9.89455 1.51935 9.70685 1.70689L4.70059 6.7072C4.51283 6.89468 4.2582 7 3.9927 7C3.72721 7 3.47258 6.89468 3.28482 6.7072L0.281063 3.70701C0.0986771 3.5184 -0.00224342 3.26578 3.785e-05 3.00357C0.00231912 2.74136 0.10762 2.49053 0.29326 2.30511C0.4789 2.11969 0.730026 2.01451 0.992551 2.01224C1.25508 2.00996 1.50799 2.11076 1.69683 2.29293L3.9927 4.58607L8.29108 0.292804C8.47884 0.105322 8.73347 0 8.99896 0C9.26446 0 9.51908 0.105322 9.70685 0.292804Z" fill="">
-                                        </path>
-                                    </svg>
-                                </span>
-                            </div>
-                        </div>
-                        <p>Client has sediment filter?</p>
-                    </label>
-                </div>
                     
                 <div className="p-6.5">
                     <div className="my-4.5"><DatePicker inputName="u3" getDatefn={getDate} Err={u3} clearWarning={clearWarning} prevData={u3Val} labelName="ultra 3 filter Change Date"/></div>

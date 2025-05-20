@@ -1,5 +1,7 @@
 // notificationService.js
+
 const axios = require('axios');
+import { Resend } from 'resend';
 
 async function sendSMS(client, message) {
     const cleanPhoneNumbers = (phoneNumbers) => {
@@ -37,7 +39,7 @@ async function sendSMS(client, message) {
                         ]
                     },
                 )
-        return res.json({status:200,message:"Text sent successfully"});
+        return({status:200,message:"Text sent successfully"});
     } catch (error) {
         console.error('SMS sending error:', error);
         throw new Error({status:500,message:error.message});
@@ -52,27 +54,24 @@ async function sendSMS(client, message) {
  * @param {string} message - The email body
  * @returns {Promise} - Promise resolving to the email provider's response
  */
-async function sendEmail(email, subject, message) {
-    try {
-        // This is a placeholder implementation
-        // Replace with your actual email provider's API
-        
-        // Example with a generic API service
-        // const response = await axios.post('https://your-email-provider.com/api/send', {
-        //     apiKey: process.env.EMAIL_API_KEY,
-        //     to: email,
-        //     subject: subject,
-        //     body: message
-        // });
-        
-        // Log for development/testing purposes
-        console.log(`[EMAIL SIMULATION] To: ${email}, Subject: ${subject}, Message: ${message}`);
-        
-        // Return success for now (replace with actual implementation)
-        return { success: true, id: 'email-' + Date.now() };
-    } catch (error) {
-        console.error('Email sending error:', error);
-        throw new Error(`Failed to send email: ${error.message}`);
+async function sendEmail(email, subject, body) {
+ const resend = new Resend(process.env.RESEND);
+    try{
+      const {data,error} = await resend.emails.send({
+        from: 'contact@riversidefilters.co.ke',
+        to: email,
+        subject,
+        html: body
+      });
+   
+      if (error) {
+        console.error("Error sending email:", error);
+        throw new Error({ error: "Failed to send email" }, { status: 500 });
+      }
+      return({ message: "Email sent successfully" }, { status: 200 });
+    }catch (error) {
+        console.error("Error sending email:", error);
+        return({ error: "Failed to send email" }, { status: 500 });
     }
 }
 

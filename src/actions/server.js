@@ -333,18 +333,18 @@ export const editClientData = async({clientId,firstName,lastName,phoneNumber,cou
 }
 
 
-export const editFilterData = async({clientId,u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate})=> {
+export const editFilterData = async({clientId,filterId,u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate})=> {
     try {
         const {user} = await auth();
         if(!user){
             return {message:"This operation is only possible if you are logged in as an admin",status:403};
         }
         await db.connect();
-        const filter = await Filter.findOne({clientId});
+        const filter = await Filter.findById(filterId);
         const client = await Client.findById(clientId);
         await filter.updateOne({
             u3_ChangeDate,ro_ChangeDate,pc_ChangeDate,rc_ChangeDate,
-        })
+        });
         const activity = new AdminActivity({
             name:"CLIENT EDIT FILTER INFO",
             activity : {

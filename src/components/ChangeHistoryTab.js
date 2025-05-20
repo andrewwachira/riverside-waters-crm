@@ -10,7 +10,7 @@ function ChangeHistoryTab({ filterInfo }) {
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 mb-7 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-full">
-      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Change History</h4>
+      <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">Replacement History</h4>
       <div className='w-full mb-6'>
         <div className="grid grid-cols-5 rounded-sm bg-gray-2 dark:bg-meta-4 w-full">
           <div className="p-2.5 border-b border-stroke">

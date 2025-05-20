@@ -12,11 +12,12 @@ export async function GET(request,{params}) {
             return {message:"This operation is only possible if you are logged in as an admin",status:403};
         }
         await db.connect();
-        const filter = await Filter.findOne({clientId});
+        const filter = await Filter.find({clientId});
+        await db.disconnect();
         if(!filter){
             return res.json({status:404, error:"Filter information for client does not exist"});
         }else{
-            return res.json({status:200, filter});
+            return res.json({status:200, filter:filter[filter.length-1]});
         }
         }catch (error) {
             return res.json({status:500,error:error.message});

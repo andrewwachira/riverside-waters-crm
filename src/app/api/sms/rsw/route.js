@@ -1,12 +1,12 @@
 import { NextResponse as res } from "next/server";
-import axios from "axios";
 import { sendSMS } from "@/lib/utils/notificationService";
+
 export async function POST(req) {
     const {client,message}  = await req.json();
-     try{
-      sendSMS(client,message);
-     } 
-     catch(error){
-       return res.json(error);
-     }
+     const smsResponse = await sendSMS(client, message);
+    if (smsResponse.error) {
+        return res.json({ error: smsResponse.error }, { status: 500 }); 
+    }
+    return res.json({ message: "SMS sent successfully" }, { status: 200 });
+  
 }

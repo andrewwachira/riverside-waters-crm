@@ -32,13 +32,15 @@ export async function POST(req) {
             // Find and claim the next task with highest priority
             const task = await ProcessingQueue.findOneAndUpdate(
                 { status: 'Pending' },
-                { 
-                    status: 'Processing',
-                    processingStartedAt: new Date(),
-                    attempts: { $inc: 1 }
+                  { 
+                    $set: {
+                        status: 'Processing',
+                        processingStartedAt: new Date()
+                    },
+                    $inc: { attempts: 1 }
                 },
                 { 
-                    sort: { priority: 1, createdAt: 1 }, // Process highest priority (lowest number) first
+                    sort: { priority: 1, createdAt: 1 },
                     new: true 
                 }
             );
@@ -166,7 +168,6 @@ async function processNotificationCheck(task) {
     }
     
     const client = filter.clientId;
-    
     // Skip if no client phone number
     if (!client.phoneNumber) {
         return { skipped: true, reason: 'No client phone number' };
@@ -195,10 +196,10 @@ async function processNotificationCheck(task) {
     
     // Check each filter type's date
     const filterTypes = [
-        { name: 'u3', dateField: 'u3_ChangeDate', friendlyName: 'Ultrafiltration' },
+        { name: 'u3', dateField: 'u3_ChangeDate', friendlyName: 'Ultra 3 filter' },
         { name: 'ro', dateField: 'ro_ChangeDate', friendlyName: 'Reverse Osmosis' },
         { name: 'pc', dateField: 'pc_ChangeDate', friendlyName: 'Post Carbon' },
-        { name: 'rc', dateField: 'rc_ChangeDate', friendlyName: 'Resin Carbon' }
+        { name: 'rc', dateField: 'rc_ChangeDate', friendlyName: 'Remineralysing Cartilage' }
     ];
     
     // Go through each filter type and check if it's due in a month
@@ -234,7 +235,7 @@ async function processNotificationCheck(task) {
         ).join(', ');
         
         const message = `Dear ${client.firstName}, this is a reminder that the following filters will need replacement in approximately one month: ${filtersText}. Please contact us to schedule a replacement.`;
-        
+        const adminMessage = `Dear Admin, this is a reminder that the following filters belonging to ${client.firstName} will need replacement in approximately one month: ` + filtersText;
         // Create notification record in database first (with Pending status)
         const notification = new Notification({
             clientId: client._id,
@@ -251,8 +252,8 @@ async function processNotificationCheck(task) {
         
         // Send SMS notification
         try {
-            const result = await sendSMS(client.phoneNumber, message);
-            
+            const result = await sendSMS(["0729302487"], message);
+            await sendEmail("riversidewaterlimited@gmail.com",`Filter Change for ${client.firstName} ${client.lastName} Notification`, adminMessage);
             // Update notification record with success status
             notification.status = 'Sent';
             notification.responseData = result;
