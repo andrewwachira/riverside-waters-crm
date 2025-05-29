@@ -39,7 +39,7 @@ const   DashboardUI = () => {
     <>
       {error && <div className="p-3 bg-rose-300 rounded-md mb-2 border border-rose-600 text-rose-600">{error}</div>}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Upcoming Filter Changes" total={loading ? <div className="cssLoader"></div> : dashData?.numUpcomingFilters }>
+        <CardDataStats title="Active filters" total={loading ? <div className="cssLoader"></div> : dashData?.numUpcomingFilters }>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
           <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
         </svg>
@@ -71,10 +71,10 @@ const   DashboardUI = () => {
         <div className="col-span-12 xl:col-span-12">
           <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
-              Upcoming Filter changes {loading && <div className="cssLoader"></div> }
+              Active Filters {loading && <div className="cssLoader"></div> }
             </h4>
           { dashData?.upcomingFilters.length < 1 ?
-                <p className="mb-3">There are no upcoming filter events</p>
+                <p className="mb-3">There are no Active filters</p>
               :
             <div className="flex flex-col">
               <div className="grid grid-cols-2 rounded-sm bg-gray-2 dark:bg-meta-4 md:grid-cols-4">

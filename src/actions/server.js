@@ -85,7 +85,7 @@ export const sendResetLink = async (email) => {
     
 }
 
-export const createClientForm = async (firstName,lastName,phoneNumber,residence,contactName,contactCell,dateOfInstallation) => {
+export const createClientForm = async (firstName,lastName,phoneNumber,county,residence,contactName,contactCell,doi) => {
     try {
         const {user} = await auth();
         if(!user){
@@ -93,12 +93,13 @@ export const createClientForm = async (firstName,lastName,phoneNumber,residence,
         }
         await db.connect()
         const client = new Client({
-            firstName,lastName,phoneNumber,residence,
+            firstName,lastName,phoneNumber,residence,county,
+            isActive:true,
             contactPerson:{
                 name:contactName,
                 phoneNumber:contactCell
             },
-            dateOfInstallation
+            dateOfInstallation:doi,
         });
         await client.save();
         const activity = new AdminActivity({

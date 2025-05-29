@@ -15,6 +15,7 @@ function ClientRegistrationForm() {
     const [doi,setDoi] = useState(null);
 
 
+
     useEffect( ()=>{
          
     },[colorMode])
@@ -32,7 +33,6 @@ function ClientRegistrationForm() {
             try {
                 const saveClient = await createClientForm(firstName,lastName,phoneNumber,county,residence,contactName,contactCell,doi);
                 if (saveClient.status === 201) {
-                    setTrigger(true);
                     reset();
                     setClientFormOpen(false);
                     toast.success("Client created successfully");
