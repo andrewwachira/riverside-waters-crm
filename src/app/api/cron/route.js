@@ -12,18 +12,13 @@ import ProcessingQueue from '@/lib/db/models/ProcessingQueue';
  */
 export async function POST(req) {
 
-    try {
-        // Quick validation that this is being called by Vercel cron
-        console.log('Cron job triggered');
-        if (req.method !== 'POST') {
-            return res.json({ error: 'Method not allowed' },{status:405});
-        }
-        
+    try { 
+        console.log('Received cron job request');
         // // Verify the cron job signature if needed
-    //    const authToken = (req.headers.get('authorization') || '').split('Bearer ').at(1);
-    //     if (!authToken || authToken !== process.env.CRON_SECRET) {
-    //         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    //     }
+        if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+     
         
         console.log('Starting filter status check job');
         const startTime = Date.now();
