@@ -11,7 +11,7 @@ import { sendSMS } from '@/lib/utils/notificationService';
 // Keep well below Vercel's function timeout (60s for Pro plans)
 const MAX_EXECUTION_TIME = 50000; // 50 seconds
 
-export async function POST(req) {
+export async function GET(req) {
     const startTime = Date.now();
     let processedCount = 0;
     
@@ -252,7 +252,7 @@ async function processNotificationCheck(task) {
         
         // Send SMS notification
         try {
-            const result = await sendSMS(["0729302487"], message);
+            const result = await sendSMS([client.phoneNumber], message);
             await sendEmail("riversidewaterlimited@gmail.com",`Filter Change for ${client.firstName} ${client.lastName} Notification`, adminMessage);
             // Update notification record with success status
             notification.status = 'Sent';
