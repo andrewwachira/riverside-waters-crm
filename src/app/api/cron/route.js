@@ -10,7 +10,7 @@ import ProcessingQueue from '@/lib/db/models/ProcessingQueue';
  * Instead of processing everything at once, this identifies work to be done
  * and queues it for background processing
  */
-export async function POST(req) {
+export async function GET(req) {
 
     try { 
         console.log('Received cron job request');

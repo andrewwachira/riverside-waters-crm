@@ -11,33 +11,33 @@ import Image from "next/image";
 import Link from "next/link";
 import avatar from "../../../public/images/avatar.png";
 import axios from "axios";
-// const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
-//   ssr: false,
-// });
 
-const   DashboardUI = () => {
+// SWR fetcher function
+const fetcher = (url) => axios.get(url).then(res => res.data.payload);
+
+const DashboardUI = () => {
   const [colorMode, setColorMode] = useColorMode();
-  const [loading,setLoading] = useState(false);
-  const [error,setError] = useState(false);
-  const [dashData,setDashData] = useState(null);
-  useEffect(()=>{
-    async function getDashData (){
-      try {
-        setLoading(true);
-        const {data} = await axios.get("/api/dashboard");
-        setLoading(false);
-        setDashData(data.payload);
-      } catch (error) {
-        setError(error.message);
-        toast.error(error.message)
-      }
-    }
-    getDashData();
-  },[]);
+  
+  // Replace manual state with useSWR
+  const { 
+    data: dashData, 
+    error, 
+    isLoading: loading,
+    mutate // Use this to manually refresh data if needed
+  } = useSWR('/api/dashboard', fetcher, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    refreshInterval: 30000, // Refresh every 30 seconds
+    errorRetryCount: 3,
+    errorRetryInterval: 5000
+  });
+
+  // Convert SWR error to string for display (optional)
+  const errorMessage = error?.message || error?.response?.data?.message || (error ? 'An error occurred' : null);
 
   return (
     <>
-      {error && <div className="p-3 bg-rose-300 rounded-md mb-2 border border-rose-600 text-rose-600">{error}</div>}
+      {errorMessage && <div className="p-3 bg-rose-300 rounded-md mb-2 border border-rose-600 text-rose-600">{errorMessage}</div>}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats title="Active filters" total={loading ? <div className="cssLoader"></div> : dashData?.numUpcomingFilters }>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -73,7 +73,7 @@ const   DashboardUI = () => {
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
               Active Filters {loading && <div className="cssLoader"></div> }
             </h4>
-          { dashData?.upcomingFilters.length < 1 ?
+          { !dashData?.upcomingFilters || dashData?.upcomingFilters.length < 1 ?
                 <p className="mb-3">There are no Active filters</p>
               :
             <div className="flex flex-col">
@@ -147,7 +147,7 @@ const   DashboardUI = () => {
             <h4 className="mb-6 text-xl font-semibold text-black dark:text-white">
               Filter changes Due {loading && <div className="cssLoader"></div> }
             </h4>
-          { dashData?.filtersDue.length < 1 ?
+          { !dashData?.filtersDue || dashData?.filtersDue.length < 1 ?
               <p className="mb-3">There are no filter change events due</p>
               :
             <div className="flex flex-col">
